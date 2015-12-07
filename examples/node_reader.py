@@ -9,10 +9,9 @@ MAX_X = 200     #width of graph
 MAX_Y = 800     #height of graph
 
 try:
-    ser = serial.Serial("COM3", baudrate=115200, timeout=0.1)
-    #ser = open('!swdata.txt', 'r')
+    ser = serial.Serial("COM4", baudrate=115200, timeout=0.1)
 except:
-    print ("nie ma portu")
+    exit("brak portu COM")
 
 i=0
 
@@ -39,7 +38,7 @@ def update(fn, l2d,l2d2,l2d3,x):
     osx=0
     wy=0
     try:
-        ser.write("RATO 0 000000000003\r\n")
+        ser.write("RATO 0 000000000002\r\n")
         data1 = ser.readline() #.rstrip() # read data from serial
     except:
         print "Error: unable to start"
