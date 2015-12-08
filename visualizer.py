@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.animation as animation
 from intersec_okr import *
 import threading
+import time
 
 
 class Visualizer:
@@ -12,10 +13,17 @@ class Visualizer:
     self.nodeY=[0,500,0,650,400,1100,1300,1800]
     self.rootX=[0,200,400,600,800,1000,1200,1400,1600,1800,1900,2000,2100,2200,2300,2500,2600]
     self.rootY=[150,200,250,250,250,300,350,400,500,650,800,1000,1150,1300,1500,1600,1700]
-    self.init_plot()
-    self.compute_position(False)
+    self.items = []
+    self.init_plot() 
 
+  def updater(self):
+    plt.pause(0.0001) 
+    plt.draw()
 
+  def clear_items(self):
+    for t in self.items:
+      t.remove()
+    self.items = []
 
   def set_point(self, x, y):
     self.person.remove()
@@ -23,8 +31,37 @@ class Visualizer:
     plt.pause(0.0001) 
     plt.draw()
 
-  def compute_position(self, nodes):
-    L=[1350,'nan',500,100,600,850,1000,'nan']
+  def increase_3min(self, tab):
+
+    tab_temp = list(tab)
+    for n in range(0,3):
+      m = min(tab_temp)
+      i = tab_temp.index(m)
+      tab[i] += 10
+      tab_temp[i] = "nan"
+
+    return tab
+
+
+  def node_action(self, nodes):
+    #L=[1350,'nan',400,100,300,850,1000,'nan']
+    L = []
+    for n in nodes:
+      if n.availible:
+        L.append(n.filtered_history[-1])
+      else:
+        L.append('nan')
+
+    while True:
+      ret = self.compute_positions(L)
+      if ret == -2:
+        print("increasing values")
+        L = self.increase_3min(L)
+      else:
+        return ret
+
+
+  def compute_positions(self, tab):   
 
     font_point = {'family': 'serif',
         'color':  'black',
@@ -38,9 +75,12 @@ class Visualizer:
         'size': 10,
         }
 
-    for n in range(0, len(L)):
-      plt.text(self.nodeX[n]-80, self.nodeY[n]+80, "{}".format(L[n]), fontdict=font_node)
+    self.clear_items()
+    L = list(tab)
 
+    for n in range(0, len(L)):
+      txt = plt.text(self.nodeX[n]-80, self.nodeY[n]+80, "{}".format(L[n]), fontdict=font_node)
+      self.items.append(txt)
 
     index = []
     values = []
@@ -55,11 +95,10 @@ class Visualizer:
       L[i] = 'nan'      
 
     for n in range(0,3):
-      print(self.nodeX[index[n]], self.nodeY[index[n]], values[n])
       circle = plt.Circle((self.nodeX[index[n]],self.nodeY[index[n]]),values[n],color='b',fill=False)
       fig = plt.gcf()
       fig.gca().add_artist(circle)
-      plt.pause(0.0001) 
+      self.items.append(circle)
 
     i = IntersectPoints(complex(self.nodeX[index[1]],self.nodeY[index[1]]), 
                         complex(self.nodeX[index[2]],self.nodeY[index[2]]),
@@ -67,7 +106,7 @@ class Visualizer:
 
     if not i:
       print "no intersectrion"
-      return
+      return -2
 
     i1=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[0],i[1])
     i2=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[2],i[3])
@@ -78,7 +117,6 @@ class Visualizer:
       searched_x, searched_y = i[2:4]
 
     plt.plot(searched_x, searched_y,'ro')
-    plt.pause(0.0001) 
 
     root_length = []
     for n in range(0,len(self.rootX)):
@@ -93,7 +131,7 @@ class Visualizer:
 
     plt.plot(self.rootX[closest_root_point1], self.rootY[closest_root_point1],'co')
     plt.plot(self.rootX[closest_root_point2], self.rootY[closest_root_point2],'co')
-    plt.pause(0.0001) 
+    
 
     distance = DistancePointLine(searched_x, searched_y, 
                             self.rootX[closest_root_point1], 
@@ -102,9 +140,9 @@ class Visualizer:
                             self.rootY[closest_root_point2])
 
    
-
-    plt.text(searched_x-100, searched_y+100, "{:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
-
+    txt = plt.text(searched_x-100, searched_y+100, "{:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
+    self.items.append(txt)
+    plt.pause(0.0001) 
 
   def init_plot(self):
     plt.ion()    

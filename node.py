@@ -8,6 +8,15 @@ class Node:
     self.availible = False
     self.MAX_CURRENT = 20
     self.MAX_FILTERED = 500
+    self.a_counter = 0
+
+  def availibility(self, state):
+    self.availible = state
+    if not state:
+      self.a_counter +=  1
+      if self.a_counter > 10:
+        self.current_data = []
+        self.filtered_history = []
 
 
   def add_data(self, distance):
@@ -19,8 +28,6 @@ class Node:
     self.filtered_history.append(filtered)
     if len(self.filtered_history) > self.MAX_FILTERED:
        self.filtered_history.pop(0)
-
-    print(distance,filtered)
 
   def probe(self):
     try:
