@@ -10,5 +10,5 @@ v = Visualizer()
 
 while True:
     #rd.update()
-    v.set_point(random.random()*10, random.random()*10)
+    v.set_point(random.random()*1000, random.random()*1000)
     time.sleep(0.1)
