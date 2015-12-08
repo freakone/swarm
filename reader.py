@@ -1,16 +1,12 @@
 import serial
 import serial.tools.list_ports
 import time
+from node import Node
 
 class SwarmReader:
     def __init__(self):
-        self.NODES = [{'id': 1, 'current_data' : [], 'filtered_history': [], 'selected': []},
-                {'id': 2, 'current_data' : [], 'filtered_history': [], 'selected': []}]
-
-        self.COMPORT = ""
-        self.MAX_CURRENT = 20
-        self.MAX_FILTERED = 500
-
+        self.NODES = []
+        self.COMPORT = "" 
 
         for c in serial.tools.list_ports.comports():
             if "FTDI" in c[2]:
@@ -24,36 +20,32 @@ class SwarmReader:
         except Exception as e:
             exit(e)
 
+    def add_node(self, id):
+        self.NODES.append(Node(id))
+
     def probe(self):
         for n in self.NODES:
-            n['selected'].insert(n['filtered_history'][-1])
-
+            n.probe()
 
     def update(self):
         for n in self.NODES:
             try:
-                self.com.write("RATO 0 {:012X}\r\n".format(n['id']))
-                line = self.com.readline()
+                self.com.write("RATO 0 {:012X}\r\n".format(n.id))
+                line = self.com.readline()                
             except Exception as e:
                 print(e)
                 print("# com read error")
                 continue
 
+            n.availible = line[1] == '0'
+
             if not line[1] == '0':
                 continue
 
             try:
-                distance = int(line[3:9])
-                n['current_data'].append(distance)
-                if len(n['current_data']) > self.MAX_CURRENT:
-                    n['current_data'].pop(0)
-
-                filtered = sum(n['current_data']) / len(n['current_data'])
-                n['filtered_history'].append(filtered)
-                if len(n['filtered_history']) > self.MAX_FILTERED:
-                    n['filtered_history'].pop(0)
-
-                print(line,distance,filtered)
+                distance = int(line[3:9])               
+                n.add_data(distance)
+                print(line)
             except Exception as e:
                 print(e)
                 print("# data conversion error")
