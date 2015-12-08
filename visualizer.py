@@ -16,7 +16,7 @@ class Visualizer:
     self.items = []
     self.init_plot() 
 
-  def updater(self):
+  def chart_update(self):
     plt.pause(0.0001) 
     plt.draw()
 
@@ -44,7 +44,7 @@ class Visualizer:
 
 
   def node_action(self, nodes):
-    #L=[1350,'nan',400,100,300,850,1000,'nan']
+    #L=[450,400,600,1233,1555,6234,1000,'nan']
     L = []
     for n in nodes:
       if n.availible:
@@ -88,6 +88,7 @@ class Visualizer:
       m = min(L)
       if not type(m) is int:
         print("not enough valid reads")
+        self.chart_update()
         return
       i = L.index(m)
       index.append(i)
@@ -140,9 +141,9 @@ class Visualizer:
                             self.rootY[closest_root_point2])
 
    
-    txt = plt.text(searched_x-100, searched_y+100, "{:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
+    txt = plt.text(0, 2000, "{:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
     self.items.append(txt)
-    plt.pause(0.0001) 
+    self.chart_update()
 
   def init_plot(self):
     plt.ion()    
@@ -152,3 +153,4 @@ class Visualizer:
     plt.plot(self.rootX, self.rootY, "--")
     plt.plot(self.rootX, self.rootY, 'k.')
     self.person, = plt.plot([], [], 'ro')  
+    self.chart_update()

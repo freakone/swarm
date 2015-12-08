@@ -29,6 +29,9 @@ class Node:
     if len(self.filtered_history) > self.MAX_FILTERED:
        self.filtered_history.pop(0)
 
+    return filtered
+
+
   def probe(self):
     try:
       self.selected.insert(self.filtered_history[-1])
