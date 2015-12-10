@@ -15,6 +15,8 @@ class Visualizer:
     self.rootY=[150,200,250,250,250,300,350,400,500,650,800,1000,1150,1300,1500,1600,1700]
     self.items = []
     self.init_plot()
+    self.flag = False
+    self.f_flagged = open('flagged_positions.txt', 'w')
 
   def chart_update(self):
     plt.pause(0.0001)
@@ -121,6 +123,11 @@ class Visualizer:
     else:
       direction = "right"
       searched_x, searched_y = i[2:4]
+
+    if self.flag:
+        self.f_flagged.write("{:f};{:f}\n".format(searched_x, searched_y))
+        self.flag = False
+        print("flagged position written")
 
     plt.plot(searched_x, searched_y,'ro')
 

@@ -21,14 +21,16 @@ v = Visualizer()
 top = Tkinter.Tk()
 def helloCallBack(event=None):
   print("next will be flagged")
-  rd.flag = True
+  #rd.flag = True
+  v.flag = True
 
 B = Tkinter.Button(top, text ="Flag entry", command = helloCallBack)
 B.pack()
 top.bind("<space>", helloCallBack)
 
-v.node_action(False, True)
+
 while True:
   #rd.update()
   #v.node_action(rd.NODES)
+  v.node_action(False, True)
   time.sleep(0.1)
