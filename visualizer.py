@@ -14,10 +14,10 @@ class Visualizer:
     self.rootX=[0,200,400,600,800,1000,1200,1400,1600,1800,1900,2000,2100,2200,2300,2500,2600]
     self.rootY=[150,200,250,250,250,300,350,400,500,650,800,1000,1150,1300,1500,1600,1700]
     self.items = []
-    self.init_plot() 
+    self.init_plot()
 
   def chart_update(self):
-    plt.pause(0.0001) 
+    plt.pause(0.0001)
     plt.draw()
 
   def clear_items(self):
@@ -28,7 +28,7 @@ class Visualizer:
   def set_point(self, x, y):
     self.person.remove()
     self.person, = plt.plot(x, y, 'ro')
-    plt.pause(0.0001) 
+    plt.pause(0.0001)
     plt.draw()
 
   def increase_3min(self, tab):
@@ -44,13 +44,13 @@ class Visualizer:
 
 
   def node_action(self, nodes):
-    #L=[450,400,600,1233,1555,6234,1000,'nan']
-    L = []
-    for n in nodes:
-      if n.availible:
-        L.append(n.filtered_history[-1])
-      else:
-        L.append('nan')
+    L=[450,400,600,1233,1555,6234,1000,'nan']
+    # L = []
+    # for n in nodes:
+    #   if n.availible:
+    #     L.append(n.filtered_history[-1])
+    #   else:
+    #     L.append('nan')
 
     while True:
       ret = self.compute_positions(L)
@@ -61,7 +61,7 @@ class Visualizer:
         return ret
 
 
-  def compute_positions(self, tab):   
+  def compute_positions(self, tab):
 
     font_point = {'family': 'serif',
         'color':  'black',
@@ -93,7 +93,7 @@ class Visualizer:
       i = L.index(m)
       index.append(i)
       values.append(m)
-      L[i] = 'nan'      
+      L[i] = 'nan'
 
     for n in range(0,3):
       circle = plt.Circle((self.nodeX[index[n]],self.nodeY[index[n]]),values[n],color='b',fill=False)
@@ -101,7 +101,7 @@ class Visualizer:
       fig.gca().add_artist(circle)
       self.items.append(circle)
 
-    i = IntersectPoints(complex(self.nodeX[index[1]],self.nodeY[index[1]]), 
+    i = IntersectPoints(complex(self.nodeX[index[1]],self.nodeY[index[1]]),
                         complex(self.nodeX[index[2]],self.nodeY[index[2]]),
                         values[1], values[2])
 
@@ -113,15 +113,17 @@ class Visualizer:
     i2=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[2],i[3])
 
     if i2 > i1:
+      direction = "left"
       searched_x, searched_y = i[0:2]
     else:
+      direction = "right"
       searched_x, searched_y = i[2:4]
 
     plt.plot(searched_x, searched_y,'ro')
 
     root_length = []
     for n in range(0,len(self.rootX)):
-      root_length.append(odl_pkt(self.rootX[n], 
+      root_length.append(odl_pkt(self.rootX[n],
                                   self.rootY[n],
                                   searched_x,
                                   searched_y))
@@ -132,25 +134,30 @@ class Visualizer:
 
     plt.plot(self.rootX[closest_root_point1], self.rootY[closest_root_point1],'co')
     plt.plot(self.rootX[closest_root_point2], self.rootY[closest_root_point2],'co')
-    
 
-    distance = DistancePointLine(searched_x, searched_y, 
-                            self.rootX[closest_root_point1], 
+
+    distance = DistancePointLine(searched_x, searched_y,
+                            self.rootX[closest_root_point1],
                             self.rootY[closest_root_point1],
-                            self.rootX[closest_root_point2], 
+                            self.rootX[closest_root_point2],
                             self.rootY[closest_root_point2])
 
-   
-    txt = plt.text(0, 2000, "{:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
+
+    txt = plt.text(-400, 2100, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
     self.items.append(txt)
+
+    if distance > 50:
+        txt = plt.text(-400, 1900, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
+        self.items.append(txt)
+
     self.chart_update()
 
   def init_plot(self):
-    plt.ion()    
+    plt.ion()
 
     plt.axis([-500, max(self.nodeX)+500, -500, max(self.nodeY)+500])
-    plt.plot(self.nodeX, self.nodeY,'go')   
+    plt.plot(self.nodeX, self.nodeY,'go')
     plt.plot(self.rootX, self.rootY, "--")
     plt.plot(self.rootX, self.rootY, 'k.')
-    self.person, = plt.plot([], [], 'ro')  
+    self.person, = plt.plot([], [], 'ro')
     self.chart_update()

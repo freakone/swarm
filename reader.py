@@ -6,7 +6,7 @@ from node import Node
 class SwarmReader:
     def __init__(self):
         self.NODES = []
-        self.COMPORT = "" 
+        self.COMPORT = ""
         self.log = False
         self.f_norm = open('normal.txt', 'w')
         self.f_filt = open('filtered.txt', 'w')
@@ -16,11 +16,11 @@ class SwarmReader:
             if "FTDI" in c[2]:
                 COMPORT = c[0]
 
-        if COMPORT == "":
+        if self.COMPORT == "":
             exit("! no device connected")
 
         try:
-            self.com = serial.Serial(COMPORT, baudrate=115200, timeout=0.1)
+            self.com = serial.Serial(self.COMPORT, baudrate=115200, timeout=0.1)
         except Exception as e:
             exit(e)
 
@@ -37,7 +37,7 @@ class SwarmReader:
                 self.com.write("RATO 0 {:012X}\r\n".format(n.id))
                 line = "l"
                 while line[0] != '=':
-                    line = self.com.readline()                
+                    line = self.com.readline()
             except Exception as e:
                 print(e)
                 print("# com read error")
@@ -52,7 +52,7 @@ class SwarmReader:
                 continue
 
             try:
-                distance = int(line[3:9])               
+                distance = int(line[3:9])
                 filtered = n.add_data(distance)
 
                 if self.log:
