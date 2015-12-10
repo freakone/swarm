@@ -43,14 +43,17 @@ class Visualizer:
     return tab
 
 
-  def node_action(self, nodes):
-    L=[450,400,600,1233,1555,6234,1000,'nan']
-    # L = []
-    # for n in nodes:
-    #   if n.availible:
-    #     L.append(n.filtered_history[-1])
-    #   else:
-    #     L.append('nan')
+  def node_action(self, nodes, test=False):
+
+    if test:
+        L=[450,400,600,1233,1555,6234,1000,'nan']
+    else:
+        L = []
+        for n in nodes:
+          if n.availible:
+            L.append(n.filtered_history[-1])
+          else:
+            L.append('nan')
 
     while True:
       ret = self.compute_positions(L)

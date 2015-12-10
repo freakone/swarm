@@ -3,6 +3,8 @@ from visualizer import Visualizer
 import time
 import random
 import threading
+import Tkinter
+import tkMessageBox
 
 # rd = SwarmReader()
 # rd.add_node(1)
@@ -16,9 +18,6 @@ import threading
 # rd.log = True
 v = Visualizer()
 
-import Tkinter
-import tkMessageBox
-
 top = Tkinter.Tk()
 def helloCallBack(event=None):
   print("next will be flagged")
@@ -28,7 +27,7 @@ B = Tkinter.Button(top, text ="Flag entry", command = helloCallBack)
 B.pack()
 top.bind("<space>", helloCallBack)
 
-v.node_action(False)
+v.node_action(False, True)
 while True:
   #rd.update()
   #v.node_action(rd.NODES)
