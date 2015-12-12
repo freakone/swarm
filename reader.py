@@ -14,7 +14,7 @@ class SwarmReader:
 
         for c in serial.tools.list_ports.comports():
             if "FTDI" in c[2]:
-                COMPORT = c[0]
+                self.COMPORT = c[0]
 
         if self.COMPORT == "":
             exit("! no device connected")
@@ -34,7 +34,9 @@ class SwarmReader:
     def update(self):
         for n in self.NODES:
             try:
-                self.com.write("RATO 0 {:012X}\r\n".format(n.id))
+                command = "RATO 0 {:012X}\r\n".format(n.id)
+                #print(command)
+                self.com.write(command)
                 line = "l"
                 while line[0] != '=':
                     line = self.com.readline()

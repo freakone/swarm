@@ -14,9 +14,9 @@ class Node:
     self.availible = state
     if not state:
       self.a_counter +=  1
-      if self.a_counter > 10:
-        self.current_data = []
-        self.filtered_history = []
+    #   if self.a_counter > 10:
+    #     self.current_data = []
+    #     self.filtered_history = []
 
 
   def add_data(self, distance):

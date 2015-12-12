@@ -6,17 +6,14 @@ import threading
 import Tkinter
 import tkMessageBox
 
-# rd = SwarmReader()
-# rd.add_node(1)
-# rd.add_node(2)
-# rd.add_node(4)
-# rd.add_node(5)
-# rd.add_node(6)
-# rd.add_node(7)
-# rd.add_node(8)
-# rd.add_node(9)
-# rd.log = True
-v = Visualizer()
+rd = SwarmReader()
+rd.add_node(0x10)
+rd.add_node(0x12)
+rd.add_node(0x13)
+rd.add_node(0x15)
+#rd.add_node(0x11)
+rd.log = True
+#v = Visualizer()
 
 top = Tkinter.Tk()
 def helloCallBack(event=None):
@@ -28,9 +25,10 @@ B = Tkinter.Button(top, text ="Flag entry", command = helloCallBack)
 B.pack()
 top.bind("<space>", helloCallBack)
 
+#v.compute_nodes([0, 100, 200], [0, 100, 200], [200, 300, 400])
 
 while True:
-  #rd.update()
-  #v.node_action(rd.NODES)
-  v.node_action(False, True)
+  rd.update()
+#  v.node_action(rd.NODES)
+  #v.node_action(False, True)
   time.sleep(0.1)

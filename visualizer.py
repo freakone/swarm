@@ -9,8 +9,11 @@ import time
 
 class Visualizer:
   def __init__(self):
-    self.nodeX=[0,500,1000,1200,1900,1750,2400,2500]
-    self.nodeY=[0,500,0,650,400,1100,1300,1800]
+    # self.nodeX=[0, 2300, 4100, 6040]
+    # self.nodeY=[0, 530, 0, 1190]
+    self.nodeX=[0, 2277, 2277+1144, 2277+1144+1960]
+    self.nodeY=[0, 630, 0, 630+565]
+
     self.rootX=[0,200,400,600,800,1000,1200,1400,1600,1800,1900,2000,2100,2200,2300,2500,2600]
     self.rootY=[150,200,250,250,250,300,350,400,500,650,800,1000,1150,1300,1500,1600,1700]
     self.items = []
@@ -39,10 +42,42 @@ class Visualizer:
     for n in range(0,3):
       m = min(tab_temp)
       i = tab_temp.index(m)
-      tab[i] += 10
+      tab[i] += 100
       tab_temp[i] = "nan"
 
     return tab
+
+  def compute_nodes(self, nx, ny, lengths):
+
+      self.clear_items()
+      plt.plot(nx, ny, 'yo')
+
+      for n in range(0,3):
+        circle = plt.Circle((nx[n],ny[n]),lengths[n],color='b',fill=False)
+        fig = plt.gcf()
+        fig.gca().add_artist(circle)
+        self.items.append(circle)
+
+      i = IntersectPoints(complex(nx[1],ny[1]),
+                          complex(nx[2],ny[2]),
+                          lengths[1], lengths[2])
+
+      if not i:
+        print "no intersectrion"
+        return -2
+
+      i1=odl_pkt(nx[0],ny[0],i[0],i[1])
+      i2=odl_pkt(nx[0], ny[0],i[2],i[3])
+
+      if i2 > i1:
+        searched_x, searched_y = i[0:2]
+      else:
+        searched_x, searched_y = i[2:4]
+
+      plt.plot(searched_x, searched_y,'ro')
+
+      print(searched_x, searched_y)
+      self.chart_update()
 
 
   def node_action(self, nodes, test=False):
@@ -110,7 +145,7 @@ class Visualizer:
                         complex(self.nodeX[index[2]],self.nodeY[index[2]]),
                         values[1], values[2])
 
-    if not i:
+    if type(i) is bool:
       print "no intersectrion"
       return -2
 
@@ -129,7 +164,8 @@ class Visualizer:
         self.flag = False
         print("flagged position written")
 
-    plt.plot(searched_x, searched_y,'ro')
+    pt, = plt.plot(searched_x, searched_y,'ro')
+    self.items.append(pt)
 
     root_length = []
     for n in range(0,len(self.rootX)):
@@ -142,9 +178,10 @@ class Visualizer:
     root_length[closest_root_point1] = "nan"
     closest_root_point2 = root_length.index(min(root_length))
 
-    plt.plot(self.rootX[closest_root_point1], self.rootY[closest_root_point1],'co')
-    plt.plot(self.rootX[closest_root_point2], self.rootY[closest_root_point2],'co')
-
+    pt, = plt.plot(self.rootX[closest_root_point1], self.rootY[closest_root_point1],'co')
+    self.items.append(pt)
+    pt, = plt.plot(self.rootX[closest_root_point2], self.rootY[closest_root_point2],'co')
+    self.items.append(pt)
 
     distance = DistancePointLine(searched_x, searched_y,
                             self.rootX[closest_root_point1],
