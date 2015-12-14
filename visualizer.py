@@ -37,7 +37,6 @@ class Visualizer:
     plt.draw()
 
   def increase_3min(self, tab):
-
     tab_temp = list(tab)
     for n in range(0,3):
       m = min(tab_temp)
@@ -47,47 +46,14 @@ class Visualizer:
 
     return tab
 
-  def compute_nodes(self, nx, ny, lengths):
-
-      self.clear_items()
-      plt.plot(nx, ny, 'yo')
-
-      for n in range(0,3):
-        circle = plt.Circle((nx[n],ny[n]),lengths[n],color='b',fill=False)
-        fig = plt.gcf()
-        fig.gca().add_artist(circle)
-        self.items.append(circle)
-
-      i = IntersectPoints(complex(nx[1],ny[1]),
-                          complex(nx[2],ny[2]),
-                          lengths[1], lengths[2])
-
-      if not i:
-        print "no intersectrion"
-        return -2
-
-      i1=odl_pkt(nx[0],ny[0],i[0],i[1])
-      i2=odl_pkt(nx[0], ny[0],i[2],i[3])
-
-      if i2 > i1:
-        searched_x, searched_y = i[0:2]
-      else:
-        searched_x, searched_y = i[2:4]
-
-      plt.plot(searched_x, searched_y,'ro')
-
-      print(searched_x, searched_y)
-      self.chart_update()
-
 
   def node_action(self, nodes, test=False):
-
     if test:
         L=[450,400,600,1233,1555,6234,1000,'nan']
     else:
         L = []
         for n in nodes:
-          if n.availible:
+          if n.availible and n.filtered_history != -1:
             L.append(n.filtered_history[-1])
           else:
             L.append('nan')
