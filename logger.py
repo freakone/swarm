@@ -28,11 +28,11 @@ v = Visualizer()
 
 #v.compute_nodes([0, 100, 200], [0, 100, 200], [200, 300, 400])
 
-fr = FileReader("filtered4.txt")
+fr = FileReader("filtered3.txt")
 
 while True:
 #  rd.update()
   fr.read_next()
   v.node_action(fr.NODES)
   #v.node_action(False, True)
-  time.sleep(1)
+  time.sleep(0.3)

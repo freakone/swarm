@@ -21,6 +21,10 @@ class Visualizer:
     self.flag = False
     self.f_flagged = open('flagged_positions.txt', 'w')
 
+    self.MEDIAN = 20
+    self.current_x = []
+    self.current_y = []
+
   def chart_update(self):
     plt.pause(0.0001)
     plt.draw()
@@ -41,7 +45,7 @@ class Visualizer:
     for n in range(0,3):
       m = min(tab_temp)
       i = tab_temp.index(m)
-      tab[i] += 100
+      tab[i] += 50
       tab_temp[i] = "nan"
 
     return tab
@@ -53,19 +57,19 @@ class Visualizer:
     else:
         L = []
         for n in nodes:
-          if n.availible and n.filtered_history != -1:
+          if n.availible and n.filtered_history[-1] != -1:
             L.append(n.filtered_history[-1])
           else:
             L.append('nan')
 
-    while True:
-      ret = self.compute_positions(L)
-      if ret == -2:
-        print("increasing values")
-        L = self.increase_3min(L)
-      else:
-        return ret
-
+    self.compute_positions(L)
+    # while True:
+    #   ret = self.compute_positions(L)
+    #   if ret == -2:
+    #     print("increasing values")
+    #     L = self.increase_3min(L)
+    #   else:
+    #     return ret
 
   def compute_positions(self, tab):
 
@@ -90,16 +94,34 @@ class Visualizer:
 
     index = []
     values = []
-    for n in range(0,3):
-      m = min(L)
+
+    m = min(L)
+
+    i = L.index(m)
+    index.append(i)
+    values.append(m)
+
+    if i == 0:
+      index.append(i+1)
+      values.append(L[i+1])
+      index.append(i+2)
+      values.append(L[i+2])
+    elif i == len(L)-1:
+      index.append(i-1)
+      values.append(L[i-1])
+      index.append(i-2)
+      values.append(L[i-2])
+    else:
+      index.append(i-1)
+      values.append(L[i-1])
+      index.append(i+1)
+      values.append(L[i+1])
+
+    for m in values:
       if not type(m) is int:
         print("not enough valid reads")
         self.chart_update()
         return
-      i = L.index(m)
-      index.append(i)
-      values.append(m)
-      L[i] = 'nan'
 
     for n in range(0,3):
       circle = plt.Circle((self.nodeX[index[n]],self.nodeY[index[n]]),values[n],color='b',fill=False)
@@ -124,6 +146,19 @@ class Visualizer:
     else:
       direction = "right"
       searched_x, searched_y = i[2:4]
+
+      self.current_x.append(searched_x)
+      self.current_y.append(searched_y)
+
+      if len(self.current_x) > self.MEDIAN:
+         self.current_x.pop(0)
+
+      if len(self.current_y) > self.MEDIAN:
+         self.current_y.pop(0)
+
+      searched_x = sum(self.current_x) / len(self.current_x)
+      searched_y = sum(self.current_y) / len(self.current_y)
+
 
     if self.flag:
         self.f_flagged.write("{:f};{:f}\n".format(searched_x, searched_y))
@@ -156,19 +191,18 @@ class Visualizer:
                             self.rootY[closest_root_point2])
 
 
-    txt = plt.text(-400, 2100, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
+    txt = plt.text(-2000, 5000, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
     self.items.append(txt)
 
     if distance > 50:
-        txt = plt.text(-400, 1900, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
+        txt = plt.text(-2000, 4100, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
         self.items.append(txt)
 
     self.chart_update()
 
   def init_plot(self):
     plt.ion()
-
-    plt.axis([-500, max(self.nodeX)+500, -500, max(self.nodeY)+500])
+    plt.axis([-5000, max(self.nodeX)+5000, -5000, max(self.nodeY)+5000])
     plt.plot(self.nodeX, self.nodeY,'go')
     plt.plot(self.rootX, self.rootY, "--")
     plt.plot(self.rootX, self.rootY, 'k.')
