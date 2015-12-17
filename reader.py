@@ -54,7 +54,12 @@ class SwarmReader:
                 continue
 
             try:
-                distance = int(line[3:9])
+                distance = line[3:9]
+                if distance.find(".") > -1:
+                    distance = int(100*float(distance))
+                else:
+                    distance = int(distance)
+
                 filtered = n.add_data(distance)
 
                 if self.log:
