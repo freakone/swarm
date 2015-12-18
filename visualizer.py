@@ -11,8 +11,11 @@ class Visualizer:
   def __init__(self):
     # self.nodeX=[0, 2300, 4100, 6040]
     # self.nodeY=[0, 530, 0, 1190]
-    self.nodeX=[0, 2277, 2277+1144, 2277+1144+1960]
-    self.nodeY=[0, 630, 0, 630+565]
+    # self.nodeX=[0, 2277, 2277+1144, 2277+1144+1960]
+    # self.nodeY=[0, 630, 0, 630+565]
+
+    self.nodeX = [0, 0, 1936, 3964, 5934, 7594, 9494, 11694]
+    self.nodeY = [0, 250, 0, 250, 0, 250, 0, 220]
 
     self.rootX=[0,200,400,600,800,1000,1200,1400,1600,1800,1900,2000,2100,2200,2300,2500,2600]
     self.rootY=[150,200,250,250,250,300,350,400,500,650,800,1000,1150,1300,1500,1600,1700]
@@ -21,7 +24,7 @@ class Visualizer:
     self.flag = False
     self.f_flagged = open('flagged_positions.txt', 'w')
 
-    self.MEDIAN = 20
+    self.MEDIAN = 10
     self.current_x = []
     self.current_y = []
 
@@ -62,14 +65,14 @@ class Visualizer:
           else:
             L.append('nan')
 
-    self.compute_positions(L)
-    # while True:
-    #   ret = self.compute_positions(L)
-    #   if ret == -2:
-    #     print("increasing values")
-    #     L = self.increase_3min(L)
-    #   else:
-    #     return ret
+    # self.compute_positions(L)
+    while True:
+      ret = self.compute_positions(L)
+      if ret == -2:
+        print("increasing values")
+        L = self.increase_3min(L)
+      else:
+        return ret
 
   def compute_positions(self, tab):
 
@@ -140,6 +143,11 @@ class Visualizer:
     i1=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[0],i[1])
     i2=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[2],i[3])
 
+    pt, = plt.plot(i[0], i[1],'co')
+    self.items.append(pt)
+    pt, = plt.plot(i[2], i[3],'co')
+    self.items.append(pt)
+
     if i2 > i1:
       direction = "left"
       searched_x, searched_y = i[0:2]
@@ -202,7 +210,7 @@ class Visualizer:
 
   def init_plot(self):
     plt.ion()
-    plt.axis([-5000, max(self.nodeX)+5000, -5000, max(self.nodeY)+5000])
+    plt.axis([-2000, max(self.nodeX)+2000, -2000, max(self.nodeY)+2000])
     plt.plot(self.nodeX, self.nodeY,'go')
     plt.plot(self.rootX, self.rootY, "--")
     plt.plot(self.rootX, self.rootY, 'k.')

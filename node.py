@@ -6,7 +6,7 @@ class Node:
     self.filtered_history = []
     self.selected_points = []
     self.availible = False
-    self.MAX_CURRENT = 20
+    self.MAX_CURRENT = 10
     self.MAX_FILTERED = 500
     self.a_counter = 0
 

@@ -7,13 +7,18 @@ import threading
 import Tkinter
 import tkMessageBox
 
-# rd = SwarmReader()
-# rd.add_node(0x10)
-# rd.add_node(0x12)
-# rd.add_node(0x13)
-# rd.add_node(0x15)
-# #rd.add_node(0x11)
-# rd.log = True
+rd = SwarmReader()
+rd.add_node(0x11)
+rd.add_node(0x10)
+rd.add_node(0x12)
+rd.add_node(0x15)
+rd.add_node(0x16)
+rd.add_node(0x13)
+rd.add_node(0x18)
+rd.add_node(0x17)
+#rd.add_node(0x16)
+
+rd.log = True
 v = Visualizer()
 
 # top = Tkinter.Tk()
@@ -28,11 +33,11 @@ v = Visualizer()
 
 #v.compute_nodes([0, 100, 200], [0, 100, 200], [200, 300, 400])
 
-fr = FileReader("filtered3.txt")
+#fr = FileReader("filtered3.txt")
 
 while True:
-#  rd.update()
-  fr.read_next()
-  v.node_action(fr.NODES)
+  rd.update()
+  #fr.read_next()
+  v.node_action(rd.NODES)
   #v.node_action(False, True)
-  time.sleep(0.3)
+  time.sleep(0.1)
