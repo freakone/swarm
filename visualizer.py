@@ -13,6 +13,8 @@ class Visualizer:
     # self.nodeY=[0, 530, 0, 1190]
     # self.nodeX=[0, 2277, 2277+1144, 2277+1144+1960]
     # self.nodeY=[0, 630, 0, 630+565]
+    self.complx = []
+    self.comply = []
 
     self.nodeX = [0, 0, 1936, 3964, 5934, 7594, 9494, 11694]
     self.nodeY = [0, 250, 0, 250, 0, 250, 0, 220]
@@ -24,11 +26,14 @@ class Visualizer:
     self.flag = False
     self.f_flagged = open('flagged_positions.txt', 'w')
 
-    self.MEDIAN = 10
+    self.MEDIAN = 20
     self.current_x = []
     self.current_y = []
 
+   
+
   def chart_update(self):
+    plt.plot(self.complx, self.comply, "--")
     plt.pause(0.0001)
     plt.draw()
 
@@ -43,16 +48,6 @@ class Visualizer:
     plt.pause(0.0001)
     plt.draw()
 
-  def increase_3min(self, tab):
-    tab_temp = list(tab)
-    for n in range(0,3):
-      m = min(tab_temp)
-      i = tab_temp.index(m)
-      tab[i] += 50
-      tab_temp[i] = "nan"
-
-    return tab
-
 
   def node_action(self, nodes, test=False):
     if test:
@@ -66,15 +61,21 @@ class Visualizer:
             L.append('nan')
 
     # self.compute_positions(L)
+    multi = 1.0
+    cnt = 0
     while True:
-      ret = self.compute_positions(L)
-      if ret == -2:
+      ret = self.compute_positions(L, multi)
+      
+      if cnt >  10:
+        return []
+      elif ret == -2:
         print("increasing values")
-        L = self.increase_3min(L)
+        multi = multi + 0.1
+        cnt = cnt + 1
       else:
         return ret
 
-  def compute_positions(self, tab):
+  def compute_positions(self, tab, multi=1):
 
     font_point = {'family': 'serif',
         'color':  'black',
@@ -102,23 +103,23 @@ class Visualizer:
 
     i = L.index(m)
     index.append(i)
-    values.append(m)
+    values.append(int(m*multi))
 
     if i == 0:
       index.append(i+1)
-      values.append(L[i+1])
+      values.append(int(L[i+1]*multi))
       index.append(i+2)
-      values.append(L[i+2])
+      values.append(int(L[i+2]*multi))
     elif i == len(L)-1:
       index.append(i-1)
-      values.append(L[i-1])
+      values.append(int(L[i-1]*multi))
       index.append(i-2)
-      values.append(L[i-2])
+      values.append(int(L[i-2]*multi))
     else:
       index.append(i-1)
-      values.append(L[i-1])
+      values.append(int(L[i-1]*multi))
       index.append(i+1)
-      values.append(L[i+1])
+      values.append(int(L[i+1]*multi))
 
     for m in values:
       if not type(m) is int:
@@ -132,28 +133,42 @@ class Visualizer:
       fig.gca().add_artist(circle)
       self.items.append(circle)
 
-    i = IntersectPoints(complex(self.nodeX[index[1]],self.nodeY[index[1]]),
-                        complex(self.nodeX[index[2]],self.nodeY[index[2]]),
-                        values[1], values[2])
+    # i = IntersectPoints(complex(self.nodeX[index[1]],self.nodeY[index[1]]),
+    #                     complex(self.nodeX[index[2]],self.nodeY[index[2]]),
+    #                     values[1], values[2])
 
-    if type(i) is bool:
-      print "no intersectrion"
-      return -2
+    # if type(i) is bool:
+    #   print "no intersectrion"
+    #   return -2
 
-    i1=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[0],i[1])
-    i2=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[2],i[3])
+    # i1=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[0],i[1])
+    # i2=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[2],i[3])
 
-    pt, = plt.plot(i[0], i[1],'co')
-    self.items.append(pt)
-    pt, = plt.plot(i[2], i[3],'co')
-    self.items.append(pt)
+    # pt, = plt.plot(i[0], i[1],'co')
+    # self.items.append(pt)
+    # pt, = plt.plot(i[2], i[3],'co')
+    # self.items.append(pt)
 
-    if i2 > i1:
-      direction = "left"
-      searched_x, searched_y = i[0:2]
-    else:
-      direction = "right"
-      searched_x, searched_y = i[2:4]
+    # if i2 > i1:
+    #   direction = "left"
+    #   searched_x, searched_y = i[0:2]
+    # else:
+    #   direction = "right"
+    #   searched_x, searched_y = i[2:4]
+      direction = ""
+
+      ret = tri(self.nodeX[index[1]], self.nodeX[index[0]], self.nodeX[index[2]],
+                self.nodeY[index[1]], self.nodeY[index[0]], self.nodeY[index[2]],
+                                  values[1], values[0], values[2])
+        
+  
+
+      if ret == 0:
+        print "nope:"
+        self.chart_update()
+        return -2
+
+      [searched_x,searched_y] = ret
 
       self.current_x.append(searched_x)
       self.current_y.append(searched_y)
@@ -167,6 +182,7 @@ class Visualizer:
       searched_x = sum(self.current_x) / len(self.current_x)
       searched_y = sum(self.current_y) / len(self.current_y)
 
+      print(searched_x, searched_y)
 
     if self.flag:
         self.f_flagged.write("{:f};{:f}\n".format(searched_x, searched_y))
@@ -174,37 +190,39 @@ class Visualizer:
         print("flagged position written")
 
     pt, = plt.plot(searched_x, searched_y,'ro')
+    self.complx.append(searched_x)
+    self.comply.append(searched_y)
     self.items.append(pt)
 
-    root_length = []
-    for n in range(0,len(self.rootX)):
-      root_length.append(odl_pkt(self.rootX[n],
-                                  self.rootY[n],
-                                  searched_x,
-                                  searched_y))
+    # root_length = []
+    # for n in range(0,len(self.rootX)):
+    #   root_length.append(odl_pkt(self.rootX[n],
+    #                               self.rootY[n],
+    #                               searched_x,
+    #                               searched_y))
 
-    closest_root_point1 = root_length.index(min(root_length))
-    root_length[closest_root_point1] = "nan"
-    closest_root_point2 = root_length.index(min(root_length))
+    # closest_root_point1 = root_length.index(min(root_length))
+    # root_length[closest_root_point1] = "nan"
+    # closest_root_point2 = root_length.index(min(root_length))
 
-    pt, = plt.plot(self.rootX[closest_root_point1], self.rootY[closest_root_point1],'co')
-    self.items.append(pt)
-    pt, = plt.plot(self.rootX[closest_root_point2], self.rootY[closest_root_point2],'co')
-    self.items.append(pt)
+    # pt, = plt.plot(self.rootX[closest_root_point1], self.rootY[closest_root_point1],'co')
+    # self.items.append(pt)
+    # pt, = plt.plot(self.rootX[closest_root_point2], self.rootY[closest_root_point2],'co')
+    # self.items.append(pt)
 
-    distance = DistancePointLine(searched_x, searched_y,
-                            self.rootX[closest_root_point1],
-                            self.rootY[closest_root_point1],
-                            self.rootX[closest_root_point2],
-                            self.rootY[closest_root_point2])
+    # distance = DistancePointLine(searched_x, searched_y,
+    #                         self.rootX[closest_root_point1],
+    #                         self.rootY[closest_root_point1],
+    #                         self.rootX[closest_root_point2],
+    #                         self.rootY[closest_root_point2])
 
 
-    txt = plt.text(-2000, 5000, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
-    self.items.append(txt)
+    # txt = plt.text(-2000, 5000, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
+    # self.items.append(txt)
 
-    if distance > 50:
-        txt = plt.text(-2000, 4100, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
-        self.items.append(txt)
+    # if distance > 50:
+    #     txt = plt.text(-2000, 4100, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
+    #     self.items.append(txt)
 
     self.chart_update()
 
@@ -212,7 +230,7 @@ class Visualizer:
     plt.ion()
     plt.axis([-2000, max(self.nodeX)+2000, -2000, max(self.nodeY)+2000])
     plt.plot(self.nodeX, self.nodeY,'go')
-    plt.plot(self.rootX, self.rootY, "--")
-    plt.plot(self.rootX, self.rootY, 'k.')
+    #plt.plot(self.rootX, self.rootY, "--")
+    #plt.plot(self.rootX, self.rootY, 'k.')
     self.person, = plt.plot([], [], 'ro')
     self.chart_update()

@@ -1,5 +1,7 @@
 from math import sqrt
 import math
+import math
+import numpy
 # Determines whether two circles collide and, if applicable,
 # the points at which their borders intersect.
 # Based on an algorithm described by Paul Bourke:
@@ -16,6 +18,15 @@ import math
 #   An array of two complex numbers containing the intersection points
 #       if the circle's borders intersect.
 
+def tri(x1, x2, x3, y1, y2, y3, d1, d2, d3):
+
+    Vb=((d2**2 - d1**2) - (x2**2 - x1**2) - (y2**2 - y1**2))/2
+    Va=((d2**2 - d3**2) - (x2**2 - x3**2) - (y2**2 - y3**2))/2
+
+    y=(Vb*(x3-x2)-Va*(x1-x2))/((y1-y2)*(x3-x2)-(y3-y2*(x1-x2)))
+    x=(Va-y*(y3-y2))/(x3-x2)
+
+    return [x,y]
 
 def odl_pkt(wspXn1,wspYn1,wspXn2,wspYn2):
     return sqrt( (wspXn1 - wspXn2)**2 + (wspYn1 - wspYn2)**2 )
