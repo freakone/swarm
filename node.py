@@ -7,13 +7,13 @@ class Node:
     self.selected_points = []
     self.availible = False
     self.MAX_CURRENT = 10
-    self.MAX_FILTERED = 500
+    self.MAX_FILTERED = 10
     self.a_counter = 0
 
   def availibility(self, state):
     self.availible = state
-    if not state:
-      self.a_counter +=  1
+    # if not state:
+    #   self.a_counter +=  1
     #   if self.a_counter > 10:
     #     self.current_data = []
     #     self.filtered_history = []

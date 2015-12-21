@@ -33,7 +33,7 @@ v = Visualizer()
 
 #v.compute_nodes([0, 100, 200], [0, 100, 200], [200, 300, 400])
 
-fr = FileReader("proba2/filtered2.txt")
+fr = FileReader("proba2/normal1.txt")
 
 while True:
   #rd.update()

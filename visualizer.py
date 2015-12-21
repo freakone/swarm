@@ -26,7 +26,7 @@ class Visualizer:
     self.flag = False
     self.f_flagged = open('flagged_positions.txt', 'w')
 
-    self.MEDIAN = 20
+    self.MEDIAN = 5
     self.current_x = []
     self.current_y = []
 
@@ -51,7 +51,9 @@ class Visualizer:
 
   def node_action(self, nodes, test=False):
     if test:
-        L=[450,400,600,1233,1555,6234,1000,'nan']
+       # L=[123334, 121345,603330,123333,155335,1800,500,1830]
+      #  L=[10377,10400,'nan',6806,4442,2729,633,1454]
+        L= [11371,11429,9579,7483,5499,3819,1830,428]
     else:
         L = []
         for n in nodes:
@@ -61,7 +63,7 @@ class Visualizer:
             L.append('nan')
 
     # self.compute_positions(L)
-    multi = 1.0
+    multi = 1
     cnt = 0
     while True:
       ret = self.compute_positions(L, multi)
@@ -133,21 +135,47 @@ class Visualizer:
       fig.gca().add_artist(circle)
       self.items.append(circle)
 
+
     # i = IntersectPoints(complex(self.nodeX[index[1]],self.nodeY[index[1]]),
-    #                     complex(self.nodeX[index[2]],self.nodeY[index[2]]),
-    #                     values[1], values[2])
+    #                 complex(self.nodeX[index[2]],self.nodeY[index[2]]),
+    #                 values[1], values[2])
 
-    # if type(i) is bool:
-    #   print "no intersectrion"
-    #   return -2
+    # if not type(i) is bool:
+    #   pt, = plt.plot(i[0], i[1],'co')
+    #   self.items.append(pt)
+    #   pt, = plt.plot(i[2], i[3],'co')
+    #   self.items.append(pt)
 
-    # i1=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[0],i[1])
-    # i2=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[2],i[3])
 
-    # pt, = plt.plot(i[0], i[1],'co')
-    # self.items.append(pt)
-    # pt, = plt.plot(i[2], i[3],'co')
-    # self.items.append(pt)
+    # i = IntersectPoints(complex(self.nodeX[index[1]],self.nodeY[index[1]]),
+    #                 complex(self.nodeX[index[0]],self.nodeY[index[0]]),
+    #                 values[1], values[0])
+
+    # if not type(i) is bool:
+    #   pt, = plt.plot(i[0], i[1],'co')
+    #   self.items.append(pt)
+    #   pt, = plt.plot(i[2], i[3],'co')
+    #   self.items.append(pt)
+
+    # i = IntersectPoints(complex(self.nodeX[index[0]],self.nodeY[index[0]]),
+    #                 complex(self.nodeX[index[2]],self.nodeY[index[2]]),
+    #                 values[0], values[2])
+
+    # if not type(i) is bool:
+    #   pt, = plt.plot(i[0], i[1],'co')
+    #   self.items.append(pt)
+    #   pt, = plt.plot(i[2], i[3],'co')
+    #   self.items.append(pt)
+
+   
+    # searched_x = 0
+    # searched_y = 0
+
+
+   # i1=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[0],i[1])
+    #i2=odl_pkt(self.nodeX[index[0]],self.nodeX[index[0]],i[2],i[3])
+
+   
 
     # if i2 > i1:
     #   direction = "left"
@@ -155,34 +183,40 @@ class Visualizer:
     # else:
     #   direction = "right"
     #   searched_x, searched_y = i[2:4]
-      direction = ""
+   
+      # direction = ""
 
-      ret = tri(self.nodeX[index[1]], self.nodeX[index[0]], self.nodeX[index[2]],
-                self.nodeY[index[1]], self.nodeY[index[0]], self.nodeY[index[2]],
-                                  values[1], values[0], values[2])
-        
-  
 
-      if ret == 0:
-        print "nope:"
-        self.chart_update()
-        return -2
+    # if self.nodeX[index[1]] - self.nodeX[index[2]] < values[1] + values[2]:
+    #   values[1] = int(values[1] * 1.20)
+    #   values[2] = int(values[2] * 1.20)
 
-      [searched_x,searched_y] = ret
+    ret = tri(self.nodeX[index[1]], self.nodeX[index[0]], self.nodeX[index[2]],
+              self.nodeY[index[1]], self.nodeY[index[0]], self.nodeY[index[2]],
+                                values[1], values[0], values[2])
+      
+    print(self.nodeX[index[1]], self.nodeX[index[0]], self.nodeX[index[2]],
+              self.nodeY[index[1]], self.nodeY[index[0]], self.nodeY[index[2]],
+                                values[1], values[0], values[2])
+    [searched_x,searched_y] = ret
 
-      self.current_x.append(searched_x)
-      self.current_y.append(searched_y)
+    # if searched_x/self.current_x[-1] > 2 or searched_x/self.current_x[-1] < 0.4 or searched_y/self.current_y[-1] > 2 or searched_y/self.current_y[-1]  < 0.4:
+    #   searched_x = self.current_x[-1]
+    #   searched_y = self.current_y[-1]
 
-      if len(self.current_x) > self.MEDIAN:
-         self.current_x.pop(0)
+    self.current_x.append(searched_x)
+    self.current_y.append(searched_y)
 
-      if len(self.current_y) > self.MEDIAN:
-         self.current_y.pop(0)
+    if len(self.current_x) > self.MEDIAN:
+       self.current_x.pop(0)
 
-      searched_x = sum(self.current_x) / len(self.current_x)
-      searched_y = sum(self.current_y) / len(self.current_y)
+    if len(self.current_y) > self.MEDIAN:
+       self.current_y.pop(0)
 
-      print(searched_x, searched_y)
+    searched_x = sum(self.current_x) / len(self.current_x)
+    searched_y = sum(self.current_y) / len(self.current_y)
+
+    print(searched_x, searched_y)
 
     if self.flag:
         self.f_flagged.write("{:f};{:f}\n".format(searched_x, searched_y))
