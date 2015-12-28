@@ -15,10 +15,19 @@ class Visualizer:
     # self.nodeY=[0, 630, 0, 630+565]
     self.complx = []
     self.comply = []
+    #dane nodow do uzupelnienia:
+    #
 
-    # self.nodeX = [0, 0, 1936, 3964, 5934, 7594, 9494, 11694]
-    # self.nodeY = [0, 250, 0, 250, 0, 250, 0, 220]
+    #self.nodeX = [0, 0, 1936, 3964, 5934, 7594, 9494, 11694]
+    #self.nodeY = [0, 250, 0, 250, 0, 250, 0, 220]
 
+    # pomiary 1-5 wsp. wezlow 10-18
+    #podane przez Lukasza
+    #self.nodeX = [0, 670., 3220., 6420., 10180., 13680., 18980., 23980., 26180.]
+    #self.nodeY = [0, 0, 600., 0.01, 600., -100., 600., 0.01, 600.  ]
+
+    #wyznaczone prze JS
+    #             10  11    12      13      14       15      16       17       18
     self.nodeX = [0, 0.,   3151.6,  6327.6, 10076.,  13652.8,  18924.6,  23740.7,  25985.]
     self.nodeY = [0, 539., 897.6,   379.3,  1239.,    584.5,    985.,   -362.2,    -644.1  ]
 
@@ -32,15 +41,15 @@ class Visualizer:
     self.flag = False
     self.f_flagged = open('flagged_positions.txt', 'w')
 
-    self.MEDIAN = 30
+    self.MEDIAN = 1 # okno dla aktualnej pozycji
     self.current_x = []
     self.current_y = []
 
-   
+
 
   def chart_update(self):
     plt.plot(self.complx, self.comply, "--")
-    plt.pause(0.0001)
+    plt.pause(0.00001)
     plt.draw()
 
   def clear_items(self):
@@ -51,108 +60,19 @@ class Visualizer:
   def set_point(self, x, y):
     self.person.remove()
     self.person, = plt.plot(x, y, 'ro')
-    #plt.pause(0.0001)
+    plt.pause(0.1)
     plt.draw()
-
-  def graph(self, formula, x_range):  
-    x = np.array(x_range)  
-    y = eval(formula)
-    pt, = plt.plot(x, y)  
-    self.items.append(pt)
-
-  def tri4(self, x1, x2, x3, y1, y2, y3, d1, d2, d3):
-# f. wlasna
-# xi, yi - wsp. wezlow
-# di odleglosc od punktow
-    if d1==0: d1=0.01
-    if d2==0: d2=0.01
-    if d3==0: d3=0.01
-    #Wyznaczenie wsp. punktu pomi?dzy wezlami w proporcji od promieni
-    [x12,y12]=Wsp_pkt_srodkowego(x1,x2,y1,y2,d1,d2)
-    [x13,y13]=Wsp_pkt_srodkowego(x1,x3,y1,y3,d1,d3)
-    [x23,y23]=Wsp_pkt_srodkowego(x2,x3,y2,y3,d2,d3)
-
-    if odl_pkt(x1,y1,x2,y2) < max([d1, d2]):
-      [x12,y12]=Wsp_pkt_srodkowego(x1,x2,y1,y2,d1,d2,-1)
-
-    if odl_pkt(x1,y1,x3,y3) < max([d1, d3]):
-      [x13,y13]=Wsp_pkt_srodkowego(x1,x3,y1,y3,d1,d3,-1)
-
-    if odl_pkt(x2, y2, x3, y3) < max([d2, d3]):
-      [x23,y23]=Wsp_pkt_srodkowego(x2,x3,y2,y3,d2,d3,-1)
-
-
-
-
-    pt, = plt.plot(x12, y12,'go')
-    self.items.append(pt)
-    pt, = plt.plot(x13, y13,'bo')
-    self.items.append(pt)
-    pt, = plt.plot(x23, y23,'yo')
-    self.items.append(pt)
-
-    x=(x12+x13+x23)/3
-    y=(y12+y13+y23)/3
-
-    return [x,y]
-    #R-nia prostej przez dane wezly
-    [a12,b12]=Rne_prostej(x1,x2,y1,y2)
-    [a13,b13]=Rne_prostej(x1,x3,y1,y3)
-    [a23,b23]=Rne_prostej(x2,x3,y2,y3)
-
-    self.graph('{}*x+{}'.format(a12, b12) , range(0, 15000))
-    self.graph('{}*x+{}'.format(a13, b13) , range(0, 15000))
-    self.graph('{}*x+{}'.format(a23, b23) , range(0, 15000))
-
-  
-    if a12==0:
-        a12p=0
-        b12p=y12
-    else:
-        a12p=-1/a12
-        b12p=x12/a12+y12
-
-    if a13==0:
-        a13p=0
-        b13p=y13
-    else:
-        a13p=-1/a13
-        b13p=x13/a13+y13
-
-    if a23==0:
-        a23p=0
-        b23p=y23
-        print "a23 duuuzo"
-    else:
-        a23p=-1/a23
-        b23p=x23/a23+y23
-
-    self.graph('{}*x+{}'.format(a12p, b12p) , range(0, 15000))
-    self.graph('{}*x+{}'.format(a13p, b13p) , range(0, 15000))
-    self.graph('{}*x+{}'.format(a23p, b23p) , range(0, 15000))
-
-    #wsp przecieca 2 punktw(kazdy z kazdym)
-    [xp12_23,yp12_23]=Wsp_pkt_przeciecia(a12p,a23p,b12p,b23p)
-    [xp13_23,yp13_23]=Wsp_pkt_przeciecia(a13p,a23p,b13p,b23p)
-    [xp12_13,yp12_13]=Wsp_pkt_przeciecia(a12p,a13p,b12p,b13p)
-
-    #Wyliczdnie sredniej
-    x=(xp12_23+xp13_23+xp12_13)/3
-    y=(yp12_23+yp13_23+yp12_13)/3
-    print "tri 4 =", x, y
-    return [x,y]
 
 
   def node_action(self, nodes, test=False):
     if test:
        # L=[123334, 121345,603330,123333,155335,1800,500,1830]
       #  L=[10377,10400,'nan',6806,4442,2729,633,1454]
-        #L= [11454,9753,6854,3656,110,3726,9097,13810,16102]
-      L = [4218,5041,1060,2198,5670,9332,14473,19432,21743]
+        L= [11371,11429,9579,7483,5499,3819,1830,428]
     else:
         L = []
         for n in nodes:
-          if n.availible and n.a_counter < 30 and len(n.filtered_history) > 0:
+          if n.availible and n.filtered_history[-1] != -1:
             L.append(n.filtered_history[-1])
           else:
             L.append('nan')
@@ -162,7 +82,7 @@ class Visualizer:
     cnt = 0
     while True:
       ret = self.compute_positions(L, multi)
-      
+
       if cnt >  10:
         return []
       elif ret == -2:
@@ -197,7 +117,7 @@ class Visualizer:
     values = []
 
     m = min(L)
-
+    print "min wartosc", m , "oraz wyliczona", min(L)
     i = L.index(m)
     index.append(i)
     values.append(m)
@@ -230,19 +150,29 @@ class Visualizer:
       fig.gca().add_artist(circle)
       self.items.append(circle)
 
-    ret = self.tri4(self.nodeX[index[1]], self.nodeX[index[0]], self.nodeX[index[2]],
+    ret = tri4(self.nodeX[index[1]], self.nodeX[index[0]], self.nodeX[index[2]],
               self.nodeY[index[1]], self.nodeY[index[0]], self.nodeY[index[2]],
                                 values[1], values[0], values[2])
-    
+
     if type(ret) is bool:
       print "nie mozna obliczyc"
       return
 
     [searched_x,searched_y] = ret
 
-    searched_x = median(self.current_x, searched_x, self.MEDIAN)
-    searched_y = median(self.current_y, searched_y, self.MEDIAN)
-    
+    self.current_x.append(searched_x)
+    self.current_y.append(searched_y)
+
+    if len(self.current_x) > self.MEDIAN:
+       self.current_x.pop(0)
+
+    if len(self.current_y) > self.MEDIAN:
+       self.current_y.pop(0)
+
+    searched_x = sum(self.current_x) / len(self.current_x)
+    searched_y = sum(self.current_y) / len(self.current_y)
+
+    print(searched_x, searched_y)
 
     if self.flag:
         self.f_flagged.write("{:f};{:f}\n".format(searched_x, searched_y))
@@ -288,10 +218,7 @@ class Visualizer:
 
   def init_plot(self):
     plt.ion()
-    mng = plt.get_current_fig_manager()
-    mng.window.state('zoomed')
-
-    plt.axis([-2000, max(self.nodeX)+2000, -2000, max(self.nodeY)+2000])
+    plt.axis([-3000, max(self.nodeX)+8000, -3000, max(self.nodeY)+3000])
     plt.plot(self.nodeX, self.nodeY,'go')
     #plt.plot(self.rootX, self.rootY, "--")
     #plt.plot(self.rootX, self.rootY, 'k.')

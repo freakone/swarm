@@ -18,6 +18,6 @@ class FileReader:
 
         for i in range(0, len(line)-1):
             if line[i] == "nan":
-                self.NODES[i].add_data(-1)
+                self.NODES[i].a_counter += 1
             else:
                 self.NODES[i].add_data(int(line[i]))

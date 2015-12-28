@@ -18,8 +18,10 @@ class Node:
     #     self.current_data = []
     #     self.filtered_history = []
 
-
   def add_data(self, distance):
+
+    self.a_counter = 0
+    
     self.current_data.append(distance)
     if len(self.current_data) > self.MAX_CURRENT:
         self.current_data.pop(0)
