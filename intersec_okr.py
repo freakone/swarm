@@ -19,6 +19,32 @@ import numpy
 #       if the circle's borders intersect.
 
 
+def tri4(x1, x2, x3, y1, y2, y3, d1, d2, d3):
+# f. wlasna
+# xi, yi - wsp. wezlow
+# di odleglosc od punktow
+    if d1==0: d1=0.01
+    if d2==0: d2=0.01
+    if d3==0: d3=0.01
+    #Wyznaczenie wsp. punktu pomi?dzy wezlami w proporcji od promieni
+    [x12,y12]=Wsp_pkt_srodkowego(x1,x2,y1,y2,d1,d2)
+    [x13,y13]=Wsp_pkt_srodkowego(x1,x3,y1,y3,d1,d3)
+    [x23,y23]=Wsp_pkt_srodkowego(x2,x3,y2,y3,d2,d3)
+
+    if odl_pkt(x1,y1,x2,y2) < max([d1, d2]):
+      [x12,y12]=Wsp_pkt_srodkowego(x1,x2,y1,y2,d1,d2,-1)
+
+    if odl_pkt(x1,y1,x3,y3) < max([d1, d3]):
+      [x13,y13]=Wsp_pkt_srodkowego(x1,x3,y1,y3,d1,d3,-1)
+
+    if odl_pkt(x2, y2, x3, y3) < max([d2, d3]):
+      [x23,y23]=Wsp_pkt_srodkowego(x2,x3,y2,y3,d2,d3,-1)
+
+    x=(x12+x13+x23)/3
+    y=(y12+y13+y23)/3
+
+    return [x,y]
+
 def median(arr, val, max):
     arr.append(val)
     
