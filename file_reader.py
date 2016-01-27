@@ -6,15 +6,17 @@ class FileReader:
         self.NODES = []
         self.f = open(file, 'r')
 
+        linex = self.f.readline().split(";")
+        liney = self.f.readline().split(";")
+        for i in range(0, len(linex)-1):
+            n = Node(i, int(linex[i]), int(liney[i]))
+            n.availible = True
+            self.NODES.append(n)
+
     def read_next(self):
+
+
         line = self.f.readline().split(";")
-
-        if len(self.NODES) == 0:
-            for i in range(0, len(line)-1):
-                n = Node(i)
-                n.availible = True
-                self.NODES.append(n)
-
 
         for i in range(0, len(line)-1):
             if line[i] == "nan":

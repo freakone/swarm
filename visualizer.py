@@ -9,25 +9,14 @@ from vibrate import Vibrator
 
 
 class Visualizer:
-  def __init__(self):
-    # self.nodeX=[0, 2300, 4100, 6040]
-    # self.nodeY=[0, 530, 0, 1190]
-    # self.nodeX=[0, 2277, 2277+1144, 2277+1144+1960]
-    # self.nodeY=[0, 630, 0, 630+565]
+  def __init__(self, nodes):
+    self.trace_max = 30
     self.complx = []
     self.comply = []
 
-    self.nodeX = [0, 0, 1936, 3964, 5934, 7594, 9494, 11694]
-    self.nodeY = [0, 250, 0, 250, 0, 250, 0, 220]
+    self.nodes = nodes
 
-    # self.nodeX = [0, 0.,   3151.6,  6327.6, 10076.,  13652.8,  18924.6,  23740.7,  25985.]
-    # self.nodeY = [0, 539., 897.6,   379.3,  1239.,    584.5,    985.,   -362.2,    -644.1  ]
 
-    # self.nodeX = [0, 556, 556]
-    # self.nodeY = [0, 0, 300]
-
-    self.rootX=[0,200,400,600,800,1000,1200,1400,1600,1800,1900,2000,2100,2200,2300,2500,2600]
-    self.rootY=[150,200,250,250,250,300,350,400,500,650,800,1000,1150,1300,1500,1600,1700]
     self.items = []
     self.init_plot()
     self.flag = False
@@ -37,10 +26,11 @@ class Visualizer:
     self.current_y = []
     self.v = Vibrator()
 
-   
+
 
   def chart_update(self):
-    plt.plot(self.complx, self.comply, "--")
+    pt, = plt.plot(self.complx, self.comply, "--")
+    self.items.append(pt)
     plt.pause(0.0001)
     plt.draw()
 
@@ -55,10 +45,10 @@ class Visualizer:
     #plt.pause(0.0001)
     plt.draw()
 
-  def graph(self, formula, x_range):  
-    x = np.array(x_range)  
+  def graph(self, formula, x_range):
+    x = np.array(x_range)
     y = eval(formula)
-    pt, = plt.plot(x, y)  
+    pt, = plt.plot(x, y)
     self.items.append(pt)
 
   def node_action(self, nodes, test=False):
@@ -75,22 +65,9 @@ class Visualizer:
           else:
             L.append('nan')
 
-    # self.compute_positions(L)
-    multi = 1
-    cnt = 0
-    while True:
-      ret = self.compute_positions(L, multi)
-      
-      if cnt >  10:
-        return []
-      elif ret == -2:
-        print("increasing values")
-        multi = multi + 0.1
-        cnt = cnt + 1
-      else:
-        return ret
+    self.compute_positions(L, nodes)
 
-  def compute_positions(self, tab, multi=1):
+  def compute_positions(self, tab, nodes):
 
     font_point = {'family': 'serif',
         'color':  'black',
@@ -105,10 +82,11 @@ class Visualizer:
         }
 
     self.clear_items()
+
     L = list(tab)
 
     for n in range(0, len(L)):
-      txt = plt.text(self.nodeX[n]-80, self.nodeY[n]+80, "{}".format(L[n]), fontdict=font_node)
+      txt = plt.text(nodes[n].posX-80, nodes[n].posY+80, "{}".format(L[n]), fontdict=font_node)
       self.items.append(txt)
 
     index = []
@@ -143,15 +121,15 @@ class Visualizer:
         return
 
     for n in range(0,3):
-      circle = plt.Circle((self.nodeX[index[n]],self.nodeY[index[n]]),values[n],color='b',fill=False)
+      circle = plt.Circle((nodes[index[n]].posX,nodes[index[n]].posY),values[n],color='b',fill=False)
       fig = plt.gcf()
       fig.gca().add_artist(circle)
       self.items.append(circle)
 
-    ret = tri4(self.nodeX[index[1]], self.nodeX[index[0]], self.nodeX[index[2]],
-              self.nodeY[index[1]], self.nodeY[index[0]], self.nodeY[index[2]],
+    ret = tri4(nodes[index[1]].posX, nodes[index[0]].posX, nodes[index[2]].posX,
+              nodes[index[1]].posY, nodes[index[0]].posY, nodes[index[2]].posY,
                                 values[1], values[0], values[2])
-    
+
 
     [searched_x,searched_y] = ret
 
@@ -161,23 +139,29 @@ class Visualizer:
     pt, = plt.plot(searched_x, searched_y,'ro')
     self.complx.append(searched_x)
     self.comply.append(searched_y)
+
+    if len(self.complx) > self.trace_max:
+      self.complx.pop(0)
+    if len(self.comply) > self.trace_max:
+      self.comply.pop(0)
+
     self.items.append(pt)
 
-    if i > len(self.nodeX) - 3:  
+    if i > len(L) - 3:
       distance = DistancePointLine(searched_x, searched_y,
-                            self.nodeX[i],
-                            self.nodeY[i],
-                            self.nodeY[i-2],
-                            self.nodeY[i-2])
+                            nodes[i].posX,
+                            nodes[i].posY,
+                            nodes[i-2].posX,
+                            nodes[i-2].posY)
     else:
       distance = DistancePointLine(searched_x, searched_y,
-                            self.nodeX[i],
-                            self.nodeY[i],
-                            self.nodeY[i+2],
-                            self.nodeY[i+2])
+                            nodes[i].posX,
+                            nodes[i].posY,
+                            nodes[i+2].posX,
+                            nodes[i+2].posY)
 
 
-    txt = plt.text(0, max(self.nodeY)+1500, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
+    txt = plt.text(0, max(map(lambda x: x.posY, self.nodes))+1500, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
     self.items.append(txt)
 
     if distance < 100:
@@ -188,20 +172,21 @@ class Visualizer:
           direction = "prawo"
           self.v.command('prawo')
 
-        txt = plt.text(0, max(self.nodeY)+1000, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
+        txt = plt.text(0, max(map(lambda x: x.posY, self.nodes)) +1000, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
         self.items.append(txt)
     else:
        self.v.command('stop')
 
     self.chart_update()
 
+
   def init_plot(self):
     plt.ion()
     mng = plt.get_current_fig_manager()
-    mng.window.state('zoomed')
+    mng.window.state('normal')
 
-    plt.axis([-2000, max(self.nodeX)+2000, -2000, max(self.nodeY)+2000])
-    plt.plot(self.nodeX, self.nodeY,'go')
+    plt.axis([-2000, max(map(lambda x: x.posX, self.nodes))+2000, -2000, max(map(lambda x: x.posY, self.nodes))+2000])
+    plt.plot(map(lambda x: x.posX, self.nodes), map(lambda x: x.posY, self.nodes),'go')
     #plt.plot(self.rootX, self.rootY, "--")
     #plt.plot(self.rootX, self.rootY, 'k.')
     self.person, = plt.plot([], [], 'ro')

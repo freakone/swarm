@@ -24,8 +24,10 @@ class SwarmReader:
         except Exception as e:
             exit(e)
 
-    def add_node(self, id):
-        self.NODES.append(Node(id))
+    def add_node(self, id, x, y):
+        n = Node(id)
+        n.set_pos(x, y)
+        self.NODES.append(n)
 
     def probe(self):
         for n in self.NODES:

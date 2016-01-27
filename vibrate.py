@@ -8,6 +8,8 @@ class Vibrator:
         self.COMPORT = ""
         self.COMMANDS = {'lewo':":L", 'prawo':":P", 'stop':":S", 'live':":W"}
 
+        return
+
         for c in serial.tools.list_ports.comports():
             if "1A86:7523" in c[2]:
                 self.COMPORT = c[0]
@@ -20,7 +22,7 @@ class Vibrator:
         except Exception as e:
             exit(e)
 
-    
+
     def command(self, cmd):
         try:
             self.com.write(self.COMMANDS[cmd])

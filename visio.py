@@ -4,9 +4,10 @@ import time
 import random
 import threading
 
-v = Visualizer()
+
 #fr = FileReader("./szklarska testy/normal_3_srodkiem do gory.txt")
 fr = FileReader("./proba2/normal3.txt")
+v = Visualizer(fr.NODES)
 
 #v.node_action(False, True)
 

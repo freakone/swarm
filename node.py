@@ -1,6 +1,6 @@
 
 class Node:
-  def __init__(self, id):
+  def __init__(self, id, x, y):
     self.id = id
     self.current_data = []
     self.filtered_history = []
@@ -9,6 +9,12 @@ class Node:
     self.MAX_CURRENT = 10
     self.MAX_FILTERED = 10
     self.a_counter = 0
+    self.posX = x
+    self.posY = y
+
+  def set_pos(self, x, y):
+    self.posX = x
+    self.posY = y
 
   def availibility(self, state):
     self.availible = state
@@ -21,7 +27,7 @@ class Node:
   def add_data(self, distance):
 
     self.a_counter = 0
-    
+
     self.current_data.append(distance)
     if len(self.current_data) > self.MAX_CURRENT:
         self.current_data.pop(0)
