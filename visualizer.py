@@ -57,6 +57,16 @@ class Visualizer:
     pt, = plt.plot(x, y)
     self.items.append(pt)
 
+  def increase_3min(self, tab):
+    tab_temp = list(tab)
+    for n in range(0,4):
+      m = min(tab_temp)
+      i = tab_temp.index(m)
+      tab[i] += 50
+      tab_temp[i] = "nan"
+
+    return tab
+
   def node_action(self, nodes, test=False):
     if test:
        # L=[123334, 121345,603330,123333,155335,1800,500,1830]
@@ -71,7 +81,14 @@ class Visualizer:
           else:
             L.append('nan')
 
-    self.compute_positions(L, nodes)
+#    self.compute_positions(L, nodes)
+    while True:
+       ret = self.compute_positions(L, nodes)
+       if ret == -2:
+         print("increasing values")
+         L = self.increase_3min(L)
+       else:
+         return ret
 
   def compute_positions(self, tab, nodes):
 
@@ -111,6 +128,7 @@ class Visualizer:
     values.append(m)
 
 
+
     for m in values:
       if not type(m) is int:
         print("not enough valid reads")
@@ -123,29 +141,31 @@ class Visualizer:
       fig.gca().add_artist(circle)
       self.items.append(circle)
 
-    i = IntersectPoints(complex(nodes[index[1]].posX,nodes[index[1]].posY),
-                        complex(nodes[index[0]].posX,nodes[index[0]].posY),
+    i = IntersectPoints(complex(nodes[index[0]].posX,nodes[index[0]].posY),
+                        complex(nodes[index[1]].posX,nodes[index[1]].posY),
                         values[0], values[1])
 
     if type(i) is bool:
       print "no intersectrion"
       return -2
 
-    i1=odl_pkt(nodes[index[0]].posX,nodes[index[0]].posY,i[0],i[1])
-    i2=odl_pkt(nodes[index[0]].posX,nodes[index[0]].posY,i[2],i[3])
+    if len(self.current_x) > 0:
+      i1=odl_pkt(sum(self.current_x) / len(self.current_x) ,sum(self.current_y) / len(self.current_y),i[0],i[1])
+      i2=odl_pkt(sum(self.current_x) / len(self.current_x) ,sum(self.current_y) / len(self.current_y),i[2],i[3])
 
-    if i2 > i1:
-      direction = "left"
-      searched_x, searched_y = i[0:2]
+
+      if i2 > i1:
+        direction = "left"
+        searched_x, searched_y = i[0:2]
+        pt, = plt.plot(i[0], i[1],'co')
+        self.items.append(pt)
+      else:
+        direction = "right"
+        searched_x, searched_y = i[2:4]
+        pt, = plt.plot(i[2], i[3],'co')
+        self.items.append(pt)
     else:
-      direction = "right"
-      searched_x, searched_y = i[2:4]
-
-    pt, = plt.plot(i[0], i[1],'co')
-    self.items.append(pt)
-    pt, = plt.plot(i[2], i[3],'co')
-    self.items.append(pt)
-
+      searched_x, searched_y = i[0:2]
 
     searched_x = median(self.current_x, searched_x, self.MEDIAN)
     searched_y = median(self.current_y, searched_y, self.MEDIAN)
