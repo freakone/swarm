@@ -78,6 +78,9 @@ def Wsp_pkt_srodkowego(x1,x2,y1,y2,d1,d2,sign=1):
 
     #x=(x1+x2)/2
     #y=(y1+y2)/2
+    if 1+prop == 0:
+        return [0,0]
+
     x=(x1+(prop*x2))/(1+prop)
     y=(y1+(prop*y2))/(1+prop)
     #x = x1 + prop * (x2 - x1);
