@@ -99,26 +99,17 @@ class Visualizer:
     values = []
 
     m = min(L)
-
     i = L.index(m)
     index.append(i)
     values.append(m)
 
-    if i == 0:
-      index.append(i+1)
-      values.append(L[i+1])
-      index.append(i+2)
-      values.append(L[i+2])
-    elif i == len(L)-1:
-      index.append(i-1)
-      values.append(L[i-1])
-      index.append(i-2)
-      values.append(L[i-2])
-    else:
-      index.append(i-1)
-      values.append(L[i-1])
-      index.append(i+1)
-      values.append(L[i+1])
+    L[i] = "nan"
+
+    m = min(L)
+    i = L.index(m)
+    index.append(i)
+    values.append(m)
+
 
     for m in values:
       if not type(m) is int:
@@ -126,25 +117,35 @@ class Visualizer:
         self.chart_update()
         return
 
-    for n in range(0,3):
+    for n in range(0,len(index)):
       circle = plt.Circle((nodes[index[n]].posX,nodes[index[n]].posY),values[n],color='b',fill=False)
       fig = plt.gcf()
       fig.gca().add_artist(circle)
       self.items.append(circle)
 
-    ret = tri4(nodes[index[1]].posX, nodes[index[0]].posX, nodes[index[2]].posX,
-              nodes[index[1]].posY, nodes[index[0]].posY, nodes[index[2]].posY,
-                                values[1], values[0], values[2])
+    i = IntersectPoints(complex(nodes[index[1]].posX,nodes[index[1]].posY),
+                        complex(nodes[index[0]].posX,nodes[index[0]].posY),
+                        values[0], values[1])
 
+    if type(i) is bool:
+      print "no intersectrion"
+      return -2
 
-    [searched_x,searched_y] = ret['result']
+    i1=odl_pkt(nodes[index[0]].posX,nodes[index[0]].posY,i[0],i[1])
+    i2=odl_pkt(nodes[index[0]].posX,nodes[index[0]].posY,i[2],i[3])
 
-    pt, = plt.plot(ret['point1'][0], ret['point1'][1],'co')
+    if i2 > i1:
+      direction = "left"
+      searched_x, searched_y = i[0:2]
+    else:
+      direction = "right"
+      searched_x, searched_y = i[2:4]
+
+    pt, = plt.plot(i[0], i[1],'co')
     self.items.append(pt)
-    pt, = plt.plot(ret['point2'][0], ret['point2'][1],'co')
+    pt, = plt.plot(i[2], i[3],'co')
     self.items.append(pt)
-    pt, = plt.plot(ret['point3'][0], ret['point3'][1],'co')
-    self.items.append(pt)
+
 
     searched_x = median(self.current_x, searched_x, self.MEDIAN)
     searched_y = median(self.current_y, searched_y, self.MEDIAN)
