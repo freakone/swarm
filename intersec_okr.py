@@ -40,8 +40,16 @@ def tri4(x1, x2, x3, y1, y2, y3, d1, d2, d3):
     if odl_pkt(x2, y2, x3, y3) < max([d2, d3]):
       [x23,y23]=Wsp_pkt_srodkowego(x2,x3,y2,y3,d2,d3,-1)
 
-    x=(x12+x13+x23)/3
-    y=(y12+y13+y23)/3
+    xx = [x12, x13, x23]
+    yy = [y12, y13, y23]
+
+    y = numpy.median(yy)
+
+    xx[yy.index(y)] *= 2
+    yy[yy.index(y)] *= 2
+
+    x= sum(xx) / 4
+    y= sum(yy) / 4
 
     return {'result': [x,y], 'point1' : [x12,y12], 'point2': [x13,y13], 'point3': [x23, y23]}
 
