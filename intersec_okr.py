@@ -43,21 +43,22 @@ def tri4(x1, x2, x3, y1, y2, y3, d1, d2, d3):
     x=(x12+x13+x23)/3
     y=(y12+y13+y23)/3
 
-    return [x,y]
+    return {'result': [x,y], 'point1' : [x12,y12], 'point2': [x13,y13], 'point3': [x23, y23]}
+
 
 def median(arr, val, max):
     arr.append(val)
-    
+
     if len(arr) > max:
        arr.pop(0)
-   
+
     l = list(arr)
 
     if len(arr) > 3:
         l.pop(l.index(min(l)))
-        l.pop(l.index(min(l)))  
+        l.pop(l.index(min(l)))
 
-    return sum(l) / len(l)  
+    return sum(l) / len(l)
 
 def Rne_prostej(xn1,xn2,yn1,yn2):
 
@@ -105,7 +106,7 @@ def tri(x1, x2, x3, y1, y2, y3, d1, d2, d3):
     Va=((d2**2 - d3**2) - (x2**2 - x3**2) - (y2**2 - y3**2))/2
 
     y=(Vb*(x3-x2)-Va*(x1-x2))/((y1-y2)*(x3-x2)-(y3-y2)*(x1-x2))
-    
+
     if x3-x2 == 0:
         return False
 
@@ -121,19 +122,19 @@ def odl_pkt(wspXn1,wspYn1,wspXn2,wspYn2):
 def lineMagnitude (x1, y1, x2, y2):
     lineMagnitude = math.sqrt(math.pow((x2 - x1), 2)+ math.pow((y2 - y1), 2))
     return lineMagnitude
- 
+
 #Calc minimum distance from a point and a line segment (i.e. consecutive vertices in a polyline).
 def DistancePointLine (px, py, x1, y1, x2, y2):
     #http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/source.vba
     LineMag = lineMagnitude(x1, y1, x2, y2)
- 
+
     if LineMag < 0.00000001:
         DistancePointLine = 9999
         return DistancePointLine
- 
+
     u1 = (((px - x1) * (x2 - x1)) + ((py - y1) * (y2 - y1)))
     u = u1 / (LineMag * LineMag)
- 
+
     if (u < 0.00001) or (u > 1):
         #// closest point does not fall within the line segment, take the shorter distance
         #// to an endpoint
@@ -148,7 +149,7 @@ def DistancePointLine (px, py, x1, y1, x2, y2):
         ix = x1 + u * (x2 - x1)
         iy = y1 + u * (y2 - y1)
         DistancePointLine = lineMagnitude(px, py, ix, iy)
- 
+
     return DistancePointLine
 
 

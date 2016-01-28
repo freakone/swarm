@@ -10,21 +10,27 @@ from vibrate import Vibrator
 
 class Visualizer:
   def __init__(self, nodes):
-    self.trace_max = 30
+    self.trace_max = 50
     self.complx = []
     self.comply = []
 
     self.nodes = nodes
+
+    self.rootX=[125, 2000, 5100, 8500, 12600, 16200, 19200, 23500, 25100, 25000]
+    self.rootY=[270, 500, 670, 860, 880, 760, 405, 58, -320, -560]
 
 
     self.items = []
     self.init_plot()
     self.flag = False
 
-    self.MEDIAN = 30
+    self.MEDIAN = 10
     self.current_x = []
     self.current_y = []
     self.v = Vibrator()
+
+    self.median_x = []
+    self.median_y = []
 
 
 
@@ -131,10 +137,28 @@ class Visualizer:
                                 values[1], values[0], values[2])
 
 
-    [searched_x,searched_y] = ret
+    [searched_x,searched_y] = ret['result']
+
+    pt, = plt.plot(ret['point1'][0], ret['point1'][1],'co')
+    self.items.append(pt)
+    pt, = plt.plot(ret['point2'][0], ret['point2'][1],'co')
+    self.items.append(pt)
+    pt, = plt.plot(ret['point3'][0], ret['point3'][1],'co')
+    self.items.append(pt)
 
     searched_x = median(self.current_x, searched_x, self.MEDIAN)
     searched_y = median(self.current_y, searched_y, self.MEDIAN)
+
+    self.median_x.append(searched_x)
+
+    if len(self.median_x) > len(self.current_x):
+      self.median_x.pop(0)
+
+    plt.figure(2)
+    plt.clf()
+    plt.plot(range(0, len(self.current_x)), self.current_x,'-', color='red')
+    plt.plot(range(0, len(self.median_x)), self.median_x,'-', color='blue')
+    plt.figure(1)
 
     pt, = plt.plot(searched_x, searched_y,'ro')
     self.complx.append(searched_x)
@@ -147,35 +171,43 @@ class Visualizer:
 
     self.items.append(pt)
 
-    if i > len(L) - 3:
-      distance = DistancePointLine(searched_x, searched_y,
-                            nodes[i].posX,
-                            nodes[i].posY,
-                            nodes[i-2].posX,
-                            nodes[i-2].posY)
-    else:
-      distance = DistancePointLine(searched_x, searched_y,
-                            nodes[i].posX,
-                            nodes[i].posY,
-                            nodes[i+2].posX,
-                            nodes[i+2].posY)
 
+    root_length = []
+    for n in range(0,len(self.rootX)):
+      root_length.append(odl_pkt(self.rootX[n],
+                                  self.rootY[n],
+                                  searched_x,
+                                  searched_y))
 
-    txt = plt.text(0, max(map(lambda x: x.posY, self.nodes))+1500, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
+    closest_root_point1 = root_length.index(min(root_length))
+    root_length[closest_root_point1] = "nan"
+    closest_root_point2 = root_length.index(min(root_length))
+
+    if closest_root_point2 - closest_root_point1 != 1:
+      root_length[closest_root_point2] = "nan"
+      closest_root_point2 = root_length.index(min(root_length))
+
+    pt, = plt.plot(self.rootX[closest_root_point1], self.rootY[closest_root_point1],'yo')
+    self.items.append(pt)
+    pt, = plt.plot(self.rootX[closest_root_point2], self.rootY[closest_root_point2],'yo')
+    self.items.append(pt)
+
+    distance = DistancePointLine(searched_x, searched_y,
+                            self.rootX[closest_root_point1],
+                            self.rootY[closest_root_point1],
+                            self.rootX[closest_root_point2],
+                            self.rootY[closest_root_point2])
+
+    sign = ((self.rootX[closest_root_point2] - self.rootX[closest_root_point1]) * (searched_y - self.rootY[closest_root_point1]) - (self.rootY[closest_root_point2] - self.rootY[closest_root_point1]) * (searched_x - self.rootX[closest_root_point1]))
+
+    direction = "lewo" if sign > 0 else "prawo"
+
+    txt = plt.text(0, -500, "Odleglosc od trasy: {:0.1f}".format(distance), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
     self.items.append(txt)
 
-    if distance < 100:
-        if i % 2 == 0:
-          direction = "lewo"
-          self.v.command('lewo')
-        else:
-          direction = "prawo"
-          self.v.command('prawo')
-
-        txt = plt.text(0, max(map(lambda x: x.posY, self.nodes)) +1000, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
+    if distance > 50:
+        txt = plt.text(0, -900, "Za daleko, kierunek: {}".format(direction), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
         self.items.append(txt)
-    else:
-       self.v.command('stop')
 
     self.chart_update()
 
@@ -183,11 +215,17 @@ class Visualizer:
   def init_plot(self):
     plt.ion()
     mng = plt.get_current_fig_manager()
-    mng.window.state('normal')
 
     plt.axis([-2000, max(map(lambda x: x.posX, self.nodes))+2000, -2000, max(map(lambda x: x.posY, self.nodes))+2000])
     plt.plot(map(lambda x: x.posX, self.nodes), map(lambda x: x.posY, self.nodes),'go')
-    #plt.plot(self.rootX, self.rootY, "--")
-    #plt.plot(self.rootX, self.rootY, 'k.')
     self.person, = plt.plot([], [], 'ro')
+    plt.plot(self.rootX, self.rootY, "--")
+    plt.plot(self.rootX, self.rootY, 'k.')
     self.chart_update()
+
+
+
+    plt.figure(2)
+    a = plt.axes(xlim=(-300,300), ylim=(-1000,1000))
+    plt.tick_params(axis='y', which='both', labelleft='on', labelright='on')
+    plt.figure(1)

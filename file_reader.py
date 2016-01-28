@@ -9,7 +9,7 @@ class FileReader:
         linex = self.f.readline().split(";")
         liney = self.f.readline().split(";")
         for i in range(0, len(linex)-1):
-            n = Node(i, int(linex[i]), int(liney[i]))
+            n = Node(i, float(linex[i]), float(liney[i]))
             n.availible = True
             self.NODES.append(n)
 

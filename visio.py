@@ -6,7 +6,7 @@ import threading
 
 
 #fr = FileReader("./szklarska testy/normal_3_srodkiem do gory.txt")
-fr = FileReader("./proba2/normal3.txt")
+fr = FileReader("./szklarska testy 2/normal-brami do gory-zatrzymanie na 5s pomiedzy i podejscie na 5s do lewego noda.txt")
 v = Visualizer(fr.NODES)
 
 #v.node_action(False, True)
