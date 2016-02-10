@@ -122,9 +122,7 @@ def tri(x1, x2, x3, y1, y2, y3, d1, d2, d3):
         return False
 
     x=(Va-y*(y3-y2))/(x3-x2)
-
-
-
+    
     return [x,y]
 
 def odl_pkt(wspXn1,wspYn1,wspXn2,wspYn2):
@@ -215,4 +213,3 @@ def Test():
 
     #print "Single-point edge collision:", PairToStr(s)
     #print "No collision:", ip(complex(1,0), complex(4, 0), 2, 2)
-

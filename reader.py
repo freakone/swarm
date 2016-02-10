@@ -13,7 +13,7 @@ class SwarmReader:
         self.flag = False
 
         for c in serial.tools.list_ports.comports():
-            if "FTDI" in c[2]:
+            if "0403:6001" in c[2]:
                 self.COMPORT = c[0]
 
         if self.COMPORT == "":
@@ -25,13 +25,25 @@ class SwarmReader:
             exit(e)
 
     def add_node(self, id, x, y):
-        n = Node(id)
+        n = Node(id, x, y)
         n.set_pos(x, y)
         self.NODES.append(n)
 
     def probe(self):
         for n in self.NODES:
             n.probe()
+
+    def write_header(self):
+        for n in self.NODES:
+            self.f_filt.write("%d;" % n.posX)
+            self.f_norm.write("%d;" % n.posX)
+        self.f_filt.write("\n")
+        self.f_norm.write("\n")
+        for n in self.NODES:
+            self.f_filt.write("%d;" % n.posY)
+            self.f_norm.write("%d;" % n.posY)
+        self.f_filt.write("\n")
+        self.f_norm.write("\n")
 
     def update(self):
         for n in self.NODES:

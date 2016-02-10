@@ -71,9 +71,11 @@ class Visualizer:
           else:
             L.append('nan')
 
-    self.compute_positions(L, nodes)
+    multi = 1
+    while multi < 2 and self.compute_positions(L, nodes, multi) == -2:
+        multi += 0.1
 
-  def compute_positions(self, tab, nodes):
+  def compute_positions(self, tab, nodes, multi=1):
 
     font_point = {'family': 'serif',
         'color':  'black',
@@ -132,19 +134,20 @@ class Visualizer:
       fig.gca().add_artist(circle)
       self.items.append(circle)
 
-    ret = tri4(nodes[index[1]].posX, nodes[index[0]].posX, nodes[index[2]].posX,
+    ret = tri(nodes[index[1]].posX, nodes[index[0]].posX, nodes[index[2]].posX,
               nodes[index[1]].posY, nodes[index[0]].posY, nodes[index[2]].posY,
                                 values[1], values[0], values[2])
+    if not ret:
+        return -2
 
+    [searched_x,searched_y] = ret
 
-    [searched_x,searched_y] = ret['result']
-
-    pt, = plt.plot(ret['point1'][0], ret['point1'][1],'co')
-    self.items.append(pt)
-    pt, = plt.plot(ret['point2'][0], ret['point2'][1],'co')
-    self.items.append(pt)
-    pt, = plt.plot(ret['point3'][0], ret['point3'][1],'co')
-    self.items.append(pt)
+    # pt, = plt.plot(ret['point1'][0], ret['point1'][1],'co')
+    # self.items.append(pt)
+    # pt, = plt.plot(ret['point2'][0], ret['point2'][1],'co')
+    # self.items.append(pt)
+    # pt, = plt.plot(ret['point3'][0], ret['point3'][1],'co')
+    # self.items.append(pt)
 
     searched_x = median(self.current_x, searched_x, self.MEDIAN)
     searched_y = median(self.current_y, searched_y, self.MEDIAN)
