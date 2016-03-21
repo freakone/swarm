@@ -1,6 +1,7 @@
 import serial
 import serial.tools.list_ports
 import time
+import datetime
 from node import Node
 
 class SwarmReader:
@@ -13,7 +14,7 @@ class SwarmReader:
         self.flag = False
 
         for c in serial.tools.list_ports.comports():
-            if "0403:6001" in c[2]:
+            if "FTDI" in c[2]:
                 self.COMPORT = c[0]
 
         if self.COMPORT == "":
@@ -90,5 +91,8 @@ class SwarmReader:
                 self.flag = False
                 print("entry flagged")
 
+            self.f_filt.write("%s" % datetime.datetime.now())
+            self.f_norm.write("%s" % datetime.datetime.now())
+            
             self.f_filt.write("\n")
             self.f_norm.write("\n")

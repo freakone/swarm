@@ -14,8 +14,6 @@ class FileReader:
             self.NODES.append(n)
 
     def read_next(self):
-
-
         line = self.f.readline().split(";")
 
         for i in range(0, len(line)-1):
