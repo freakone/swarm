@@ -11,7 +11,6 @@ fr = FileReader("./boisko testy 16.03.12/normal_50m_prosto_wolno.txt")
 # fr = FileReader("./boisko testy 16.03.12/normal_100m_prosto_wolno.txt")
 #fr = FileReader("./wroclaw_stadion1/2_po_kwadracie_normal.txt")
 t = Tracker(fr.NODES)
-#v.node_action(False, True)
 
 while True:
   fr.read_next()
