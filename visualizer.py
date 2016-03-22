@@ -11,6 +11,7 @@ import json
 
 class Visualizer:
   def __init__(self):
+    self.TRACKER = ("127.0.0.1", 5005)
     self.trace_max = 50
     self.complx = []
     self.comply = []
@@ -19,7 +20,8 @@ class Visualizer:
     self.nodes = []
 
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-    self.sock.bind(("127.0.0.1", 5005))
+    self.sock.bind(("127.0.0.1", 5006))
+    self.sock.sendto("init", self.TRACKER)
 
 
   def chart_update(self):
@@ -66,8 +68,8 @@ class Visualizer:
       txt = plt.text(self.nodes[0][n]-80, self.nodes[1][n]+80, "{}".format(data["distances"][n]), fontdict=font_node)
       self.items.append(txt)
 
-    for n in range(0,len(data["indexes"])):
-      circle = plt.Circle((self.nodes[data["indexes"][n]][0],self.nodes[data["indexes"][n]][1]),data["indexes"][n],color='b',fill=False)
+    for i in data["indexes"]:
+      circle = plt.Circle((self.nodes[0][i],self.nodes[1][i]),data["distances"][i],color='b',fill=False)
       fig = plt.gcf()
       fig.gca().add_artist(circle)
       self.items.append(circle)
@@ -101,6 +103,7 @@ class Visualizer:
 
 
   def init_plot(self, nodes):
+    print nodes
     self.nodes = nodes
     plt.ion()
     mng = plt.get_current_fig_manager()
@@ -119,7 +122,6 @@ def socket_action():
     data, add = v.sock.recvfrom(1024)
     js = json.loads(data)
     actions[js["info"]](js["data"])
-    print data
 
 thr = threading.Thread(target=socket_action)
 thr.setDaemon(True)

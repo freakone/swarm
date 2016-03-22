@@ -27,14 +27,28 @@ class Tracker:
     self.median_x = []
     self.median_y = []
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-    self.IP = "127.0.0.1"
-    self.PORT = 5005
+    self.sock.bind(("127.0.0.1", 5005))
+    self.clients = []
 
-    self.send_json("init", [map(lambda x: x.posX, nodes), map(lambda x: x.posY, nodes), self.rootX, self.rootY])
+    thr = threading.Thread(target=self.socket_action)
+    thr.setDaemon(True)
+    thr.start()
 
+  def socket_action(self):
+    while True:
+      data, add = self.sock.recvfrom(1024)
+      print data
+      if data == "init":
+        self.send_json("init", [map(lambda x: x.posX, self.nodes), map(lambda x: x.posY, self.nodes), self.rootX, self.rootY], add)
+        self.clients.append(add)
+        print add
 
-  def send_json(self, what, data):
-    self.sock.sendto(json.dumps({"info": what, "data": data}), (self.IP, self.PORT))
+  def send_json(self, what, data, addr=""):
+    if addr == "":
+      for c in self.clients:
+        self.sock.sendto(json.dumps({"info": what, "data": data}), c)
+    else:
+      self.sock.sendto(json.dumps({"info": what, "data": data}), addr)
 
   def increase_3min(self, tab):
     tab_temp = list(tab)
