@@ -16,8 +16,12 @@ class FileReader:
     def read_next(self):
         line = self.f.readline().split(";")
 
+        time = line[-1].strip()
+
         for i in range(0, len(line)-1):
             if line[i] == "nan":
                 self.NODES[i].a_counter += 1
             else:
                 self.NODES[i].add_data(int(line[i]))
+
+            self.NODES[i].current_time = time

@@ -80,14 +80,18 @@ class Visualizer:
 
     self.clear_items()
 
+    axes = plt.gca()
+    y = axes.get_ylim()
+    x = axes.get_xlim()
+
     if "error" in data:
-       axes = plt.gca()
-       y = axes.get_ylim()
-       x = axes.get_xlim()
        txt = plt.text(np.median(x)/2, np.median(y), data["error"], fontdict=font_error, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
        self.items.append(txt)
        self.chart_update()
        return
+
+    txt = plt.text(x[0] + 5000, y[1]+200, data["time"], fontdict=font_node)
+    self.items.append(txt)
 
     for n in range(0, len(self.nodes[0])):
       txt = plt.text(self.nodes[0][n]-80, self.nodes[1][n]+80, "{}".format(data["distances"][n]), fontdict=font_node)

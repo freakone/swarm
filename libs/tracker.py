@@ -87,7 +87,7 @@ class Tracker:
 
   def compute_positions(self, tab, nodes):
 
-    json_send = {"distances": tab}
+    json_send = {"distances": tab, "time": nodes[0].current_time}
 
     L = list(tab)
 

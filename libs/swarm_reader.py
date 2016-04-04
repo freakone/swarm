@@ -70,6 +70,7 @@ class SwarmReader:
                     distance = int(distance)
 
                 filtered = n.add_data(distance)
+                n.current_time = datetime.datetime.now();
 
                 if self.log:
                     self.f_norm.write("%d;" % distance)

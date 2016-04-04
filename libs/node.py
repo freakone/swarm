@@ -11,6 +11,7 @@ class Node:
     self.a_counter = 0
     self.posX = x
     self.posY = y
+    self.current_time = "0"
 
   def set_pos(self, x, y):
     self.posX = x
