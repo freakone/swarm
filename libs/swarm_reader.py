@@ -10,7 +10,6 @@ class SwarmReader:
         self.COMPORT = ""
         self.log = False
         self.f_norm = open('normal.txt', 'w')
-        self.f_filt = open('filtered.txt', 'w')
         self.flag = False
 
         for c in serial.tools.list_ports.comports():
@@ -36,14 +35,10 @@ class SwarmReader:
 
     def write_header(self):
         for n in self.NODES:
-            self.f_filt.write("%d;" % n.posX)
             self.f_norm.write("%d;" % n.posX)
-        self.f_filt.write("\n")
         self.f_norm.write("\n")
         for n in self.NODES:
-            self.f_filt.write("%d;" % n.posY)
             self.f_norm.write("%d;" % n.posY)
-        self.f_filt.write("\n")
         self.f_norm.write("\n")
 
     def update(self):
@@ -64,7 +59,6 @@ class SwarmReader:
 
             if not line[1] == '0':
                 if self.log:
-                    self.f_filt.write("nan;")
                     self.f_norm.write("nan;")
                 continue
 
@@ -78,7 +72,6 @@ class SwarmReader:
                 filtered = n.add_data(distance)
 
                 if self.log:
-                    self.f_filt.write("%d;" % filtered)
                     self.f_norm.write("%d;" % distance)
             except Exception as e:
                 print(e)
@@ -86,13 +79,10 @@ class SwarmReader:
                 continue
         if self.log:
             if self.flag:
-                self.f_filt.write("flagged;")
                 self.f_norm.write("flagged;")
                 self.flag = False
                 print("entry flagged")
 
-            self.f_filt.write("%s" % datetime.datetime.now())
             self.f_norm.write("%s" % datetime.datetime.now())
 
-            self.f_filt.write("\n")
             self.f_norm.write("\n")

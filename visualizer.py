@@ -11,13 +11,14 @@ import json
 
 class Visualizer:
   def __init__(self):
-    self.TRACKER = ("156.17.14.197", 5005)
+    self.TRACKER = ("192.168.1.200", 5005)
     self.trace_max = 50
     self.complx = []
     self.comply = []
 
     self.items = []
     self.nodes = []
+    self.state = "init"
 
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
     self.sock.bind(("0.0.0.0", 5006))
@@ -26,6 +27,16 @@ class Visualizer:
     self.sock.sendto("init", self.TRACKER)
 
   def chart_update(self):
+    font_point = {'family': 'serif',
+        'color':  'blue',
+        'weight': 'bold',
+        'size': 10,
+        }
+    axes = plt.gca()
+    y = axes.get_ylim()
+    x = axes.get_xlim()
+    txt = plt.text(x[0], y[1]+200, self.state, fontdict=font_point)
+    self.items.append(txt)
     pt, = plt.plot(self.complx, self.comply, "--")
     self.items.append(pt)
     plt.pause(0.0001)
@@ -73,7 +84,7 @@ class Visualizer:
        axes = plt.gca()
        y = axes.get_ylim()
        x = axes.get_xlim()
-       txt = plt.text(np.median(x)/2, np.median(y), data["error"], fontdict=font_error)
+       txt = plt.text(np.median(x)/2, np.median(y), data["error"], fontdict=font_error, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
        self.items.append(txt)
        self.chart_update()
        return
@@ -115,6 +126,12 @@ class Visualizer:
 
     self.chart_update()
 
+  def ping(self, data):
+    self.state = "RPI state: {}".format(['off', 'on'][data])
+    if not data:
+      self.clear_items()
+      self.chart_update()
+
 
   def init_plot(self, nodes):
     print nodes
@@ -126,9 +143,10 @@ class Visualizer:
     plt.plot(nodes[2], nodes[3], "--")
     plt.plot(nodes[2], nodes[3], 'k.')
     self.chart_update()
+    self.inited = True
 
 v = Visualizer()
-actions = {"init": v.init_plot, "loop": v.loop}
+actions = {"init": v.init_plot, "loop": v.loop, "ping": v.ping}
 
 def socket_action():
   while True:

@@ -19,7 +19,7 @@ class Tracker:
     self.rootX=[0, 2500, 2700, 3000, 5000, 10000, 15000, 20000, 25000, 30000]
     self.rootY=[2300, 2300, 2300, 2300, 2300, 2300, 2500, 2500, 2500, 2500]
 
-    self.MEDIAN = 10
+    self.MEDIAN = 5
     self.current_x = []
     self.current_y = []
     self.v = Vibrator()
@@ -43,6 +43,9 @@ class Tracker:
         if not add in self.clients:
           self.clients.append(add)
           print add
+
+  def send_ping(self, state):
+    self.send_json("ping", state)
 
   def send_json(self, what, data, addr=""):
     if addr == "":

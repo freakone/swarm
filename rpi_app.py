@@ -27,6 +27,16 @@ rd.log = True
 rd.write_header()
 
 t = Tracker(rd.NODES)
+
+def ping():
+  while True:
+    t.send_ping(pi.state)
+    time.sleep(1)
+
+th = threading.Thread(target=ping)
+th.setDaemon(True)
+th.start()
+
 while True:
   if pi.state == rpi.State.running:
     rd.update()
