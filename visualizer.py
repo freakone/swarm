@@ -2,16 +2,16 @@ from threading import Timer,Thread,Event
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.animation as animation
-from intersec_okr import *
+from libs.intersec_okr import *
 import threading
 import time
-from vibrate import Vibrator
+from libs.vibrate import Vibrator
 import socket
 import json
 
 class Visualizer:
   def __init__(self):
-    self.TRACKER = ("127.0.0.1", 5005)
+    self.TRACKER = ("156.17.14.197", 5005)
     self.trace_max = 50
     self.complx = []
     self.comply = []
@@ -20,9 +20,10 @@ class Visualizer:
     self.nodes = []
 
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-    self.sock.bind(("127.0.0.1", 5006))
-    self.sock.sendto("init", self.TRACKER)
+    self.sock.bind(("0.0.0.0", 5006))
 
+  def init_chart_command(self):
+    self.sock.sendto("init", self.TRACKER)
 
   def chart_update(self):
     pt, = plt.plot(self.complx, self.comply, "--")
@@ -61,8 +62,22 @@ class Visualizer:
         'size': 10,
         }
 
+    font_error = {'family': 'serif',
+        'color':  'red',
+        'weight': 'normal',
+        'size': 20,
+        }
+
     self.clear_items()
 
+    if "error" in data:
+       axes = plt.gca()
+       y = axes.get_ylim()
+       x = axes.get_xlim()
+       txt = plt.text(np.median(x)/2, np.median(y), data["error"], fontdict=font_error)
+       self.items.append(txt)
+       self.chart_update()
+       return
 
     for n in range(0, len(self.nodes[0])):
       txt = plt.text(self.nodes[0][n]-80, self.nodes[1][n]+80, "{}".format(data["distances"][n]), fontdict=font_node)
@@ -106,7 +121,6 @@ class Visualizer:
     print nodes
     self.nodes = nodes
     plt.ion()
-    mng = plt.get_current_fig_manager()
     plt.axis([-2000, max(nodes[0])+2000, -3000, max(nodes[1])+3000])
     plt.plot(nodes[0], nodes[1],'go')
     self.person, = plt.plot([], [], 'ro')
@@ -126,6 +140,8 @@ def socket_action():
 thr = threading.Thread(target=socket_action)
 thr.setDaemon(True)
 thr.start()
+
+v.init_chart_command()
 
 while True:
   time.sleep(1)

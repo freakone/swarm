@@ -1,12 +1,13 @@
-from reader import SwarmReader
-from file_reader import FileReader
+from libs.swarm_reader import SwarmReader
+from libs.file_reader import FileReader
 import time
 import random
 import threading
 import sys
 from enum import Enum
 import RPi.GPIO as GPIO
-import rpi
+import libs.rpi as rpi
+from libs.tracker import Tracker
 
 
 pi = rpi.RPI_HAL()
@@ -25,7 +26,7 @@ rd.add_node(0x19, 15694, 220)
 rd.log = True
 rd.write_header()
 
-t = Tracker(fr.NODES)
+t = Tracker(rd.NODES)
 while True:
   if pi.state == rpi.State.running:
     rd.update()
