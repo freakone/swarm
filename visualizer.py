@@ -47,7 +47,6 @@ class Visualizer:
     pt, = plt.plot(x, y)
     self.items.append(pt)
 
-
   def loop(self, data):
 
     font_point = {'family': 'serif',
