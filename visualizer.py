@@ -11,8 +11,8 @@ import json
 
 class Visualizer:
   def __init__(self):
-    self.TRACKER = ("192.168.1.200", 5005)
-    self.trace_max = 50
+    self.TRACKER = ("127.0.0.1", 5005)
+    self.trace_max = 50000
     self.complx = []
     self.comply = []
 
@@ -84,14 +84,7 @@ class Visualizer:
     y = axes.get_ylim()
     x = axes.get_xlim()
 
-    if "error" in data:
-       txt = plt.text(np.median(x)/2, np.median(y), data["error"], fontdict=font_error, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
-       self.items.append(txt)
-       self.chart_update()
-       return
-
-    txt = plt.text(x[0] + 5000, y[1]+200, data["time"], fontdict=font_node)
-    self.items.append(txt)
+    print data["distances"]
 
     for n in range(0, len(self.nodes[0])):
       txt = plt.text(self.nodes[0][n]-80, self.nodes[1][n]+80, "{}".format(data["distances"][n]), fontdict=font_node)
@@ -102,6 +95,15 @@ class Visualizer:
       fig = plt.gcf()
       fig.gca().add_artist(circle)
       self.items.append(circle)
+
+    if "error" in data:
+       txt = plt.text(np.median(x)/2, np.median(y), data["error"], fontdict=font_error, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
+       self.items.append(txt)
+       self.chart_update()
+       return
+
+    txt = plt.text(x[0] + 5000, y[1]+200, data["time"], fontdict=font_node)
+    self.items.append(txt)
 
     pt, = plt.plot(data["point"][0], data["point"][1],'co')
     self.items.append(pt)
@@ -141,7 +143,7 @@ class Visualizer:
     print nodes
     self.nodes = nodes
     plt.ion()
-    plt.axis([-2000, max(nodes[0])+2000, -3000, max(nodes[1])+3000])
+    plt.axis([-10000, max(nodes[0])+10000, -10000, max(nodes[1])+10000])
     plt.plot(nodes[0], nodes[1],'go')
     self.person, = plt.plot([], [], 'ro')
     plt.plot(nodes[2], nodes[3], "--")

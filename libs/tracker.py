@@ -19,10 +19,14 @@ class Tracker:
     self.rootX=[0, 2500, 2700, 3000, 5000, 10000, 15000, 20000, 25000, 30000]
     self.rootY=[2300, 2300, 2300, 2300, 2300, 2300, 2500, 2500, 2500, 2500]
 
-    self.MEDIAN = 5
+    self.MEDIAN = 8
     self.current_x = []
     self.current_y = []
     self.v = Vibrator()
+
+    self.x = np.matrix('0. 0. 0. 0.').T
+    self.P = np.matrix(np.eye(4))*1000
+    self.R = 0.01**2
 
     self.median_x = []
     self.median_y = []
@@ -57,33 +61,72 @@ class Tracker:
     else:
       self.sock.sendto(json.dumps({"info": what, "data": data}), addr)
 
-  def increase_3min(self, tab):
-    tab_temp = list(tab)
-    for n in range(0,3):
-      m = min(tab_temp)
-      i = tab_temp.index(m)
-      tab[i] += 60
-      tab_temp[i] = "nan"
-
-    return tab
-
   def node_action(self, nodes):
     L = []
     for n in nodes:
-      if n.availible and n.a_counter < 30 and len(n.current_data) > 0:
-        L.append(n.current_data[-1])
+      if n.availible and n.a_counter < 30 and len(n.filtered_history) > 0:
+        L.append(n.filtered_history[-1])
       else:
         L.append('nan')
 
-    cnt = 0
-    while True:
-       ret = self.compute_positions(L, nodes)
-       if ret == -2 and cnt < 10:
-        # print("increasing values")
-         L = self.increase_3min(L)
-         cnt = cnt + 10
-       else:
-         return ret
+    self.compute_positions(L, nodes)
+
+  def kalman_xy(self, x, P, measurement, R,
+                motion = np.matrix('0. 0. 0. 0.').T,
+                Q = np.matrix(np.eye(4))):
+      """
+      Parameters:
+      x: initial state 4-tuple of location and velocity: (x0, x1, x0_dot, x1_dot)
+      P: initial uncertainty convariance matrix
+      measurement: observed position
+      R: measurement noise
+      motion: external motion added to state vector x
+      Q: motion noise (same shape as P)
+      """
+      return self.kalman(x, P, measurement, R, motion, Q,
+                    F = np.matrix('''
+                        1. 0. 1. 0.;
+                        0. 1. 0. 1.;
+                        0. 0. 1. 0.;
+                        0. 0. 0. 1.
+                        '''),
+                    H = np.matrix('''
+                        1. 0. 0. 0.;
+                        0. 1. 0. 0.'''))
+
+  def kalman(self, x, P, measurement, R, motion, Q, F, H):
+      '''
+      Parameters:
+      x: initial state
+      P: initial uncertainty convariance matrix
+      measurement: observed position (same shape as H*x)
+      R: measurement noise (same shape as H)
+      motion: external motion added to state vector x
+      Q: motion noise (same shape as P)
+      F: next state function: x_prime = F*x
+      H: measurement function: position = H*x
+
+      Return: the updated and predicted new values for (x, P)
+
+      See also http://en.wikipedia.org/wiki/Kalman_filter
+
+      This version of kalman can be applied to many different situations by
+      appropriately defining F and H
+      '''
+      # UPDATE x, P based on measurement m
+      # distance between measured and current position-belief
+      y = np.matrix(measurement).T - H * x
+      S = H * P * H.T + R  # residual convariance
+      K = P * H.T * S.I    # Kalman gain
+      x = x + K*y
+      I = np.matrix(np.eye(F.shape[0])) # identity matrix
+      P = (I - K*H)*P
+
+      # PREDICT x, P based on motion
+      x = F*x + motion
+      P = F*P*F.T + Q
+
+      return x, P
 
   def compute_positions(self, tab, nodes):
 
@@ -121,7 +164,9 @@ class Tracker:
                         values[1], values[0])
 
     if type(i) is bool:
-      return -2
+      json_send["error"] = "calc error"
+      self.send_json("loop", json_send)
+      return
 
     if len(self.current_x) > 0:
       i1=odl_pkt(sum(self.current_x) / len(self.current_x) ,sum(self.current_y) / len(self.current_y),i[0],i[1])
@@ -140,12 +185,8 @@ class Tracker:
     searched_x = median(self.current_x, searched_x, self.MEDIAN)
     searched_y = median(self.current_y, searched_y, self.MEDIAN)
 
-    json_send["point"] = [searched_x, searched_y]
-
-    self.median_x.append(searched_x)
-
-    if len(self.median_x) > len(self.current_x):
-      self.median_x.pop(0)
+    self.x, self.P = self.kalman_xy(self.x, self.P, [searched_x, searched_y], self.R)
+    json_send["point"] = map(lambda m: m[0], self.x[:2].tolist())
 
     root_length = []
     for n in range(0,len(self.rootX)):
