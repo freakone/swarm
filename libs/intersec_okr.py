@@ -220,9 +220,10 @@ def DistancePointLine (px, py, x1, y1, x2, y2):
     return DistancePointLine
 
 def dist(px,py,x1,y1,x2,y2): # x3,y3 is the point
-
-    a, b = np.polyfit([x1, x2], [y1, y2], 1)
-    return math.fabs(a*px+b*py) / sqrt(pow(a, 2) + pow(b, 2))
+    a = y1-y2
+    b = x2-x1
+    c = (x1-x2)*y1 + (y2-y1)*x1
+    return math.fabs(a*px+b*py+c) / sqrt(pow(a, 2) + pow(b, 2))
 
 def IntersectPoints(P0, P1, r0, r1):
     if type(P0) != complex or type(P1) != complex:

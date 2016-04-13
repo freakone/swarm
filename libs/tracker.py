@@ -149,7 +149,7 @@ class Tracker:
       root_length[closest_root_point2] = "nan"
       closest_root_point2 = root_length.index(min(root_length))
 
-    distance = DistancePointLine(searched_x, searched_y,
+    distance = dist(searched_x, searched_y,
                           self.rootX[closest_root_point1],
                           self.rootY[closest_root_point1],
                           self.rootX[closest_root_point2],
