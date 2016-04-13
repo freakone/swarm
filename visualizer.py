@@ -84,8 +84,6 @@ class Visualizer:
     y = axes.get_ylim()
     x = axes.get_xlim()
 
-    print data["distances"]
-
     for n in range(0, len(self.nodes[0])):
       txt = plt.text(self.nodes[0][n]-80, self.nodes[1][n]+80, "{}".format(data["distances"][n]), fontdict=font_node)
       self.items.append(txt)
@@ -121,14 +119,13 @@ class Visualizer:
     pt, = plt.plot(self.nodes[2][data["closest_root"][1]], self.nodes[3][data["closest_root"][1]],'yo')
     self.items.append(pt)
 
-    if data.has_key("distance"):
-
-      txt = plt.text(0, -500, "Odleglosc od trasy: {:0.1f}".format(data["distance"]), fontdict=font_point, bbox={'facecolor':'white', 'alpha':0.8, 'pad':1})
+    if data.has_key("root_distance"):
+      txt = plt.text(x[0] + 40000, y[1]+200, "Odleglosc od trasy: {:0.1f}".format(data["root_distance"]), fontdict=font_node)
       self.items.append(txt)
 
-      if distance > 50:
-          txt = plt.text(0, -900, "Za daleko, kierunek: {}".format(data["direction"]), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
-          self.items.append(txt)
+      # if distance > 50:
+      #     txt = plt.text(0, -900, "Za daleko, kierunek: {}".format(data["direction"]), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
+      #     self.items.append(txt)
 
     self.chart_update()
 

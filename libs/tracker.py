@@ -71,63 +71,6 @@ class Tracker:
 
     self.compute_positions(L, nodes)
 
-  def kalman_xy(self, x, P, measurement, R,
-                motion = np.matrix('0. 0. 0. 0.').T,
-                Q = np.matrix(np.eye(4))):
-      """
-      Parameters:
-      x: initial state 4-tuple of location and velocity: (x0, x1, x0_dot, x1_dot)
-      P: initial uncertainty convariance matrix
-      measurement: observed position
-      R: measurement noise
-      motion: external motion added to state vector x
-      Q: motion noise (same shape as P)
-      """
-      return self.kalman(x, P, measurement, R, motion, Q,
-                    F = np.matrix('''
-                        1. 0. 1. 0.;
-                        0. 1. 0. 1.;
-                        0. 0. 1. 0.;
-                        0. 0. 0. 1.
-                        '''),
-                    H = np.matrix('''
-                        1. 0. 0. 0.;
-                        0. 1. 0. 0.'''))
-
-  def kalman(self, x, P, measurement, R, motion, Q, F, H):
-      '''
-      Parameters:
-      x: initial state
-      P: initial uncertainty convariance matrix
-      measurement: observed position (same shape as H*x)
-      R: measurement noise (same shape as H)
-      motion: external motion added to state vector x
-      Q: motion noise (same shape as P)
-      F: next state function: x_prime = F*x
-      H: measurement function: position = H*x
-
-      Return: the updated and predicted new values for (x, P)
-
-      See also http://en.wikipedia.org/wiki/Kalman_filter
-
-      This version of kalman can be applied to many different situations by
-      appropriately defining F and H
-      '''
-      # UPDATE x, P based on measurement m
-      # distance between measured and current position-belief
-      y = np.matrix(measurement).T - H * x
-      S = H * P * H.T + R  # residual convariance
-      K = P * H.T * S.I    # Kalman gain
-      x = x + K*y
-      I = np.matrix(np.eye(F.shape[0])) # identity matrix
-      P = (I - K*H)*P
-
-      # PREDICT x, P based on motion
-      x = F*x + motion
-      P = F*P*F.T + Q
-
-      return x, P
-
   def compute_positions(self, tab, nodes):
 
     json_send = {"distances": tab, "time": nodes[0].current_time}
@@ -185,8 +128,9 @@ class Tracker:
     searched_x = median(self.current_x, searched_x, self.MEDIAN)
     searched_y = median(self.current_y, searched_y, self.MEDIAN)
 
-    self.x, self.P = self.kalman_xy(self.x, self.P, [searched_x, searched_y], self.R)
-    json_send["point"] = map(lambda m: m[0], self.x[:2].tolist())
+    self.x, self.P = kalman_xy(self.x, self.P, [searched_x, searched_y], self.R)
+    searched_x, searched_y = map(lambda m: m[0], self.x[:2].tolist())
+    json_send["point"] = [searched_x, searched_y]
 
     root_length = []
     for n in range(0,len(self.rootX)):
@@ -205,17 +149,17 @@ class Tracker:
       root_length[closest_root_point2] = "nan"
       closest_root_point2 = root_length.index(min(root_length))
 
-      distance = DistancePointLine(searched_x, searched_y,
-                            self.rootX[closest_root_point1],
-                            self.rootY[closest_root_point1],
-                            self.rootX[closest_root_point2],
-                            self.rootY[closest_root_point2])
+    distance = DistancePointLine(searched_x, searched_y,
+                          self.rootX[closest_root_point1],
+                          self.rootY[closest_root_point1],
+                          self.rootX[closest_root_point2],
+                          self.rootY[closest_root_point2])
 
-      sign = ((self.rootX[closest_root_point2] - self.rootX[closest_root_point1]) * (searched_y - self.rootY[closest_root_point1]) - (self.rootY[closest_root_point2] - self.rootY[closest_root_point1]) * (searched_x - self.rootX[closest_root_point1]))
-      direction = "lewo" if sign > 0 else "prawo"
+    sign = ((self.rootX[closest_root_point2] - self.rootX[closest_root_point1]) * (searched_y - self.rootY[closest_root_point1]) - (self.rootY[closest_root_point2] - self.rootY[closest_root_point1]) * (searched_x - self.rootX[closest_root_point1]))
+    direction = "lewo" if sign > 0 else "prawo"
 
-      json_send["root_distance"] = distance
-      json_send["direction"] = direction
+    json_send["root_distance"] = distance
+    json_send["direction"] = direction
 
     self.send_json("loop", json_send)
 

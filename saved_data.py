@@ -4,10 +4,7 @@ import time
 import random
 import threading
 
-#fr = FileReader("./boisko testy 16.03.12/normal_25m_wolno_po_prosrej_V_ok 1_krok_na1s_od10_.txt")
-fr = FileReader("./data/odra 7.04/wolno.txt")
-# fr = FileReader("./boisko testy 16.03.12/normal_100m_prosto_wolno.txt")
-#fr = FileReader("./wroclaw_stadion1/2_po_kwadracie_normal.txt")
+fr = FileReader("./data/testy_wroclaw_park/normal_50m_prosto_wolno.txt")
 t = Tracker(fr.NODES)
 
 while True:
