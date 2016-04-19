@@ -11,7 +11,7 @@ import json
 
 class Visualizer:
   def __init__(self):
-    self.TRACKER = ("127.0.0.1", 5005)
+    self.TRACKER = ("192.168.1.200", 5005)
     self.trace_max = 50000
     self.complx = []
     self.comply = []
@@ -89,13 +89,14 @@ class Visualizer:
       self.items.append(txt)
 
     for i in data["indexes"]:
-      circle = plt.Circle((self.nodes[0][i],self.nodes[1][i]),data["distances"][i],color='b',fill=False)
-      fig = plt.gcf()
-      fig.gca().add_artist(circle)
-      self.items.append(circle)
+      if type(data["distances"][i]) is int:
+        circle = plt.Circle((self.nodes[0][i],self.nodes[1][i]),data["distances"][i],color='b',fill=False)
+        fig = plt.gcf()
+        fig.gca().add_artist(circle)
+        self.items.append(circle)
 
     if "error" in data:
-       txt = plt.text(np.median(x)/2, np.median(y), data["error"], fontdict=font_error, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
+       txt = plt.text(0, int(min(y)) + 2000, data["error"], fontdict=font_error, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})
        self.items.append(txt)
        self.chart_update()
        return

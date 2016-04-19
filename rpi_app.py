@@ -16,7 +16,7 @@ rd = SwarmReader()
 rd.add_node(0x18, 14700, 150)
 rd.add_node(0x15, 7500, 150)
 rd.add_node(0x16, 2800, 100)
-rd.add_node(0x10, 0, 0)
+rd.add_node(0x05, 0, 0)
 rd.log = True
 rd.write_header()
 
