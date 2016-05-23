@@ -11,7 +11,7 @@ import json
 
 class Visualizer:
   def __init__(self):
-    self.TRACKER = ("192.168.1.200", 5005)
+    self.TRACKER = ("127.0.0.1", 5005)
     self.trace_max = 50000
     self.complx = []
     self.comply = []
@@ -121,8 +121,9 @@ class Visualizer:
     self.items.append(pt)
 
     if data.has_key("root_distance"):
-      txt = plt.text(x[0] + 40000, y[1]+200, "Odleglosc od trasy: {:0.1f}".format(data["root_distance"]), fontdict=font_node)
+      txt = plt.text(x[0] + 30000, y[1]+200, "Odleglosc od trasy: {:0.1f}".format(data["root_distance"]), fontdict=font_node)
       self.items.append(txt)
+      # print data["root_distance"]
 
       # if distance > 50:
       #     txt = plt.text(0, -900, "Za daleko, kierunek: {}".format(data["direction"]), fontdict=font_point, bbox={'facecolor':'red', 'alpha':0.5, 'pad':1})

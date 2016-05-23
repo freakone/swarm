@@ -6,12 +6,14 @@ from enum import Enum
 import RPi.GPIO as GPIO
 
 
-GREEN = 17
-RED = 27
-BTN_START = 5
-BTN_STOP = 6
+MOTOR = 17
+BTN_START = 22
+BTN_STOP = 27
 
 class State(Enum):
+  error = 4
+  turn_left = 3
+  turn_right = 2
   running = 1
   stop = 0
 
@@ -23,12 +25,11 @@ class RPI_HAL:
     GPIO.setup(BTN_START, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(BTN_START, GPIO.FALLING, callback=self.button_callback)
     GPIO.add_event_detect(BTN_STOP, GPIO.FALLING, callback=self.button_callback)
-    GPIO.setup(GREEN, GPIO.OUT)
-    GPIO.setup(RED, GPIO.OUT)
-    GPIO.output(GREEN, 1)
-    GPIO.output(RED, 1)
+    GPIO.setup(MOTOR, GPIO.OUT)
+    GPIO.output(MOTOR, 0)
     self.state = State.stop
     self.btntimes = {BTN_STOP: 1, BTN_START: 1}
+    self.alternate = False
 
 
     th_led = threading.Thread(target=self.blinker)
@@ -50,13 +51,19 @@ class RPI_HAL:
 
   def blinker(self):
     while True:
-      if self.state == State.running:
-        GPIO.output(GREEN, not GPIO.input(GREEN))
+      if self.state == State.error:
+        GPIO.output(MOTOR, 1)
+      elif self.state == State.turn_right:
+        GPIO.output(MOTOR, self.alternate)
+        self.alternate = not self.alternate
+        time.sleep(0.3)
+      elif self.state == State.turn_left:
+        GPIO.output(MOTOR, self.alternate)
+        self.alternate = not self.alternate
       else:
-        GPIO.output(RED, not GPIO.input(RED))
-      time.sleep(1)
+        GPIO.output(MOTOR, 0)
+      time.sleep(0.2)
 
   def set_state(self, state):
     self.state = state;
-    GPIO.output(GREEN, 1)
-    GPIO.output(RED, 1)
+    GPIO.output(MOTOR, 0)

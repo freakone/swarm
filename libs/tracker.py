@@ -3,7 +3,6 @@ import numpy as np
 from intersec_okr import *
 import threading
 import time
-from vibrate import Vibrator
 import socket
 import json
 
@@ -19,10 +18,9 @@ class Tracker:
     self.rootX=[0, 2500, 2700, 3000, 5000, 10000, 15000, 20000, 25000, 30000]
     self.rootY=[2300, 2300, 2300, 2300, 2300, 2300, 2500, 2500, 2500, 2500]
 
-    self.MEDIAN = 8
+    self.MEDIAN = 5
     self.current_x = []
     self.current_y = []
-    self.v = Vibrator()
 
     self.x = np.matrix('0. 0. 0. 0.').T
     self.P = np.matrix(np.eye(4))*1000
@@ -34,9 +32,10 @@ class Tracker:
     self.sock.bind(("0.0.0.0", 5005))
     self.clients = []
 
-    thr = threading.Thread(target=self.socket_action)
-    thr.setDaemon(True)
-    thr.start()
+    self.send_json("init", [map(lambda x: x.posX, self.nodes), map(lambda x: x.posY, self.nodes), self.rootX, self.rootY], ("127.0.0.1", 5006))
+    # thr = threading.Thread(target=self.socket_action)
+    # thr.setDaemon(True)
+    # thr.start()
 
   def socket_action(self):
     while True:
@@ -52,14 +51,16 @@ class Tracker:
     self.send_json("ping", state)
 
   def send_json(self, what, data, addr=""):
-    if addr == "":
-      for c in self.clients:
-        try:
-          self.sock.sendto(json.dumps({"info": what, "data": data}), c)
-        except:
-          self.clients.remove(c)
-    else:
-      self.sock.sendto(json.dumps({"info": what, "data": data}), addr)
+    # print data
+    # if addr == "":
+    #   for c in self.clients:
+    #     try:
+    #       self.sock.sendto(json.dumps({"info": what, "data": data}), c)
+    #     except:
+    #       print "ex"
+    #       #self.clients.remove(c)
+    # else:
+    self.sock.sendto(json.dumps({"info": what, "data": data}), ("127.0.0.1", 5006))
 
   def node_action(self, nodes):
     L = []
@@ -69,11 +70,11 @@ class Tracker:
       else:
         L.append('nan')
 
-    self.compute_positions(L, nodes)
+    return self.compute_positions(L, nodes)
 
   def compute_positions(self, tab, nodes):
 
-    json_send = {"distances": tab, "time": nodes[0].current_time}
+    json_send = {"distances": tab, "time": "aaa"} #nodes[0].current_time}
 
     L = list(tab)
 
@@ -98,7 +99,7 @@ class Tracker:
       if not type(m) is int:
         json_send["error"] = "not enough valid reads"
         self.send_json("loop", json_send)
-        return
+        return False
 
 
 # !!! w wywolaniu funkcji zamieniono kolejnosc wezlow (indeksy 1 na 0), aby wybrac wlasciwe rozwiazanie
@@ -109,7 +110,7 @@ class Tracker:
     if type(i) is bool:
       json_send["error"] = "calc error"
       self.send_json("loop", json_send)
-      return
+      return False
 
     if len(self.current_x) > 0:
       i1=odl_pkt(sum(self.current_x) / len(self.current_x) ,sum(self.current_y) / len(self.current_y),i[0],i[1])
@@ -162,5 +163,7 @@ class Tracker:
     json_send["direction"] = direction
 
     self.send_json("loop", json_send)
+
+    return {'dist': distance, 'dir': direction}
 
 

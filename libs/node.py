@@ -6,8 +6,8 @@ class Node:
     self.filtered_history = []
     self.selected_points = []
     self.availible = False
-    self.MAX_CURRENT = 10
-    self.MAX_FILTERED = 10
+    self.MAX_CURRENT = 5
+    self.MAX_FILTERED = 5
     self.a_counter = 0
     self.posX = x
     self.posY = y
