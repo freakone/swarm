@@ -63,3 +63,5 @@ while True:
       rd.clear()
       returned = []
       measurements = 0
+  else:
+    time.sleep(0.1)

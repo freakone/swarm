@@ -19,6 +19,7 @@ class State(Enum):
 
 class RPI_HAL:
   def __init__(self):
+
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     GPIO.setup(BTN_STOP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -30,20 +31,17 @@ class RPI_HAL:
     self.state = State.stop
     self.btntimes = {BTN_STOP: 1, BTN_START: 1}
     self.alternate = False
-
-
     th_led = threading.Thread(target=self.blinker)
     th_led.setDaemon(True)
     th_led.start()
 
   def button_callback(self, channel):
-
-    if time.clock() - self.btntimes[channel] < 0.5:
+    if time.time() - self.btntimes[channel] < 0.5:
       return
 
-    self.btntimes[channel] = time.clock()
+    self.btntimes[channel] = time.time()
 
-    print time.clock()
+    print time.time()
     if channel == BTN_START:
       self.set_state(State.running)
     elif channel == BTN_STOP:
