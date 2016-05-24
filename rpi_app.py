@@ -11,13 +11,13 @@ from libs.tracker import Tracker
 
 
 measurements = 0
-returned = {}
+returned = []
 
 pi = rpi.RPI_HAL()
 
 rd = SwarmReader()
 rd.add_node(0x10, 0, 0)
-rd.add_node(0x11, 10000, 0)
+rd.add_node(0x11, 500, 0)
 rd.add_node(0x12, 20000, 0)
 rd.log = True
 rd.write_header()
@@ -36,17 +36,30 @@ th.start()
 while True:
   if pi.state == rpi.State.running:
     rd.update()
-    returned = t.node_action(rd.NODES)
+    ret = t.node_action(rd.NODES)
+    if ret:
+      returned.append(ret)
     time.sleep(0.05)
     measurements = measurements + 1
 
     if measurements > 40:
-      measurements = 0
-      if returned:
-        print returned['dist']
-        print returned['dir']
+      print len(returned)
+      if len(returned) > 20:
+        print returned[-1]['dist']
+        print returned[-1]['dir']
+
+        if returned[-1]['dist'] > 150:
+          if returned[-1]['dir'] == "prawo":
+            pi.set_state(rpi.State.turn_right)
+          else:
+            pi.set_state(rpi.State.turn_left)
       else:
         pi.set_state(rpi.State.error)
 
       time.sleep(1.5)
+
       pi.set_state(rpi.State.stop)
+      t.clear()
+      rd.clear()
+      returned = []
+      measurements = 0

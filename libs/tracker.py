@@ -18,7 +18,7 @@ class Tracker:
     self.rootX=[0, 2500, 2700, 3000, 5000, 10000, 15000, 20000, 25000, 30000]
     self.rootY=[2300, 2300, 2300, 2300, 2300, 2300, 2500, 2500, 2500, 2500]
 
-    self.MEDIAN = 5
+    self.MEDIAN = 20
     self.current_x = []
     self.current_y = []
 
@@ -26,21 +26,22 @@ class Tracker:
     self.P = np.matrix(np.eye(4))*1000
     self.R = 0.01**2
 
-    self.median_x = []
-    self.median_y = []
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
     self.sock.bind(("0.0.0.0", 5005))
     self.clients = []
 
-    self.send_json("init", [map(lambda x: x.posX, self.nodes), map(lambda x: x.posY, self.nodes), self.rootX, self.rootY], ("127.0.0.1", 5006))
-    # thr = threading.Thread(target=self.socket_action)
-    # thr.setDaemon(True)
-    # thr.start()
+    # self.send_json("init", [map(lambda x: x.posX, self.nodes), map(lambda x: x.posY, self.nodes), self.rootX, self.rootY], ("127.0.0.1", 5006))
+    thr = threading.Thread(target=self.socket_action)
+    thr.setDaemon(True)
+    thr.start()
+
+  def clear(self):
+    self.current_x = []
+    self.current_y = []
 
   def socket_action(self):
     while True:
       data, add = self.sock.recvfrom(1024)
-      print data
       if data == "init":
         self.send_json("init", [map(lambda x: x.posX, self.nodes), map(lambda x: x.posY, self.nodes), self.rootX, self.rootY], add)
         if not add in self.clients:
@@ -51,16 +52,15 @@ class Tracker:
     self.send_json("ping", state)
 
   def send_json(self, what, data, addr=""):
-    # print data
-    # if addr == "":
-    #   for c in self.clients:
-    #     try:
-    #       self.sock.sendto(json.dumps({"info": what, "data": data}), c)
-    #     except:
-    #       print "ex"
-    #       #self.clients.remove(c)
-    # else:
-    self.sock.sendto(json.dumps({"info": what, "data": data}), ("127.0.0.1", 5006))
+    if addr == "":
+      for c in self.clients:
+        try:
+          self.sock.sendto(json.dumps({"info": what, "data": data}), c)
+        except:
+          print "ex"
+          self.clients.remove(c)
+    else:
+      self.sock.sendto(json.dumps({"info": what, "data": data}), addr)
 
   def node_action(self, nodes):
     L = []

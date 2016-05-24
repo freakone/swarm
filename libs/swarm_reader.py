@@ -41,6 +41,10 @@ class SwarmReader:
             self.f_norm.write("%d;" % n.posY)
         self.f_norm.write("\n")
 
+    def clear(self):
+      for n in self.NODES:
+        n.clear()
+
     def update(self):
         for n in self.NODES:
             try:

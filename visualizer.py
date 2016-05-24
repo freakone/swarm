@@ -5,13 +5,12 @@ import matplotlib.animation as animation
 from libs.intersec_okr import *
 import threading
 import time
-from libs.vibrate import Vibrator
 import socket
 import json
 
 class Visualizer:
   def __init__(self):
-    self.TRACKER = ("127.0.0.1", 5005)
+    self.TRACKER = ("192.168.1.200", 5005)
     self.trace_max = 50000
     self.complx = []
     self.comply = []
@@ -101,7 +100,7 @@ class Visualizer:
        self.chart_update()
        return
 
-    txt = plt.text(x[0] + 5000, y[1]+200, data["time"], fontdict=font_node)
+    txt = plt.text(x[0] + 10000, y[1]+200, data["time"], fontdict=font_node)
     self.items.append(txt)
 
     pt, = plt.plot(data["point"][0], data["point"][1],'co')
@@ -132,10 +131,11 @@ class Visualizer:
     self.chart_update()
 
   def ping(self, data):
-    self.state = "RPI state: {}".format(['off', 'on'][data])
-    if not data:
-      self.clear_items()
-      self.chart_update()
+    if data in range(0,2):
+      self.state = "RPI state: {}".format(['off', 'on'][data])
+      if not data:
+        self.clear_items()
+        self.chart_update()
 
 
   def init_plot(self, nodes):

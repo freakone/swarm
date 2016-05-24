@@ -25,6 +25,10 @@ class Node:
     #     self.current_data = []
     #     self.filtered_history = []
 
+  def clear(self):
+    self.current_data = []
+    self.filtered_history = []
+
   def add_data(self, distance):
 
     self.a_counter = 0
