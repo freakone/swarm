@@ -41,7 +41,7 @@ def measure(forced):
       returned.append(ret)
     time.sleep(0.02)
 
-    if pi.state == rpi.State.running and not forced:
+    if not pi.state == rpi.State.periodic and not forced:
       t.clear()
       rd.clear()
       return False
@@ -73,11 +73,11 @@ def measure(forced):
 
 
 while True:
-  if pi.state == rpi.State.stop:
+  if pi.state == rpi.State.periodic:
     if measure(False):
       for i in range(0,50):
         time.sleep(0.1)
-        if not pi.state == rpi.State.stop:
+        if not pi.state == rpi.State.periodic:
           break
   elif pi.state == rpi.State.running:
     print "on demand"

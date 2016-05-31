@@ -11,6 +11,7 @@ BTN_START = 22
 BTN_STOP = 27
 
 class State(Enum):
+  periodic = 5
   error = 4
   turn_left = 3
   turn_right = 2
@@ -28,6 +29,7 @@ class RPI_HAL:
     GPIO.setup(MOTOR, GPIO.OUT)
     GPIO.output(MOTOR, 0)
     self.state = State.stop
+    self.periodic_mode = False
     self.btntimes = {BTN_STOP: 1, BTN_START: 1}
     self.alternate = False
     th_led = threading.Thread(target=self.blinker)
@@ -44,7 +46,11 @@ class RPI_HAL:
     if channel == BTN_START:
       self.set_state(State.running)
     elif channel == BTN_STOP:
-      self.set_state(State.stop)
+      self.periodic_mode = not self.periodic_mode
+      if self.periodic_mode:
+        self.set_state(State.periodic)
+      else:
+        self.set_state(State.stop)
 
   def blinker(self):
     while True:
@@ -64,5 +70,9 @@ class RPI_HAL:
         time.sleep(0.05)
 
   def set_state(self, state):
-    self.state = state;
+
+    if state == State.stop and self.periodic_mode:
+      state = State.periodic
+
+    self.state = state
     GPIO.output(MOTOR, 0)
