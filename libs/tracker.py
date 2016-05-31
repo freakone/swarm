@@ -15,10 +15,10 @@ class Tracker:
 
     self.nodes = nodes
 
-    self.rootX=[0, 2500, 2700, 3000, 5000, 10000, 15000, 20000, 25000, 30000]
-    self.rootY=[2300, 2300, 2300, 2300, 2300, 2300, 2500, 2500, 2500, 2500]
+    self.rootX=[0, 1200, 2700, 5000, 10000, 15000, 20000, 25000, 30000]
+    self.rootY=[3060, 3060, 3060, 3060, 3060, 3060, 3060, 3060, 3060]
 
-    self.MEDIAN = 20
+    self.MEDIAN = 10
     self.current_x = []
     self.current_y = []
 
@@ -101,8 +101,8 @@ class Tracker:
         self.send_json("loop", json_send)
         return False
 
+    index.sort()
 
-# !!! w wywolaniu funkcji zamieniono kolejnosc wezlow (indeksy 1 na 0), aby wybrac wlasciwe rozwiazanie
     i = IntersectPoints(complex(nodes[index[1]].posX,nodes[index[1]].posY),
                         complex(nodes[index[0]].posX,nodes[index[0]].posY),
                         values[1], values[0])
@@ -144,19 +144,22 @@ class Tracker:
     root_length[closest_root_point1] = "nan"
     closest_root_point2 = root_length.index(min(root_length))
 
-    json_send["closest_root"] = [closest_root_point1, closest_root_point2]
+    root = [closest_root_point1, closest_root_point2]
+    root.sort()
 
-    if closest_root_point2 - closest_root_point1 != 1:
-      root_length[closest_root_point2] = "nan"
-      closest_root_point2 = root_length.index(min(root_length))
+    json_send["closest_root"] = root
+
+    if root[1] - root[0] != 1:
+      root_length[root[1]] = "nan"
+      root[1] = root_length.index(min(root_length))
 
     distance = dist(searched_x, searched_y,
-                          self.rootX[closest_root_point1],
-                          self.rootY[closest_root_point1],
-                          self.rootX[closest_root_point2],
-                          self.rootY[closest_root_point2])
+                          self.rootX[root[0]],
+                          self.rootY[root[0]],
+                          self.rootX[root[1]],
+                          self.rootY[root[1]])
 
-    sign = ((self.rootX[closest_root_point2] - self.rootX[closest_root_point1]) * (searched_y - self.rootY[closest_root_point1]) - (self.rootY[closest_root_point2] - self.rootY[closest_root_point1]) * (searched_x - self.rootX[closest_root_point1]))
+    sign = ((self.rootX[root[1]] - self.rootX[root[0]]) * (searched_y - self.rootY[root[0]]) - (self.rootY[root[1]] - self.rootY[root[0]]) * (searched_x - self.rootX[root[0]]))
     direction = "lewo" if sign > 0 else "prawo"
 
     json_send["root_distance"] = distance
@@ -164,6 +167,6 @@ class Tracker:
 
     self.send_json("loop", json_send)
 
-    return {'dist': distance, 'dir': direction}
+    return {'dist': distance, 'dir': direction, 'pos': [searched_x, searched_y]}
 
 

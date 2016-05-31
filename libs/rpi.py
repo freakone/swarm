@@ -51,6 +51,7 @@ class RPI_HAL:
     while True:
       if self.state == State.error:
         GPIO.output(MOTOR, 1)
+        time.sleep(0.1)
       elif self.state == State.turn_right:
         GPIO.output(MOTOR, self.alternate)
         self.alternate = not self.alternate
@@ -58,9 +59,10 @@ class RPI_HAL:
       elif self.state == State.turn_left:
         GPIO.output(MOTOR, self.alternate)
         self.alternate = not self.alternate
+        time.sleep(0.25)
       else:
         GPIO.output(MOTOR, 0)
-      time.sleep(0.22)
+        time.sleep(0.05)
 
   def set_state(self, state):
     self.state = state;

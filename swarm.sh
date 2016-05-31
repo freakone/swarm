@@ -1,6 +1,6 @@
 #! /bin/sh
 # swarm daemon
-# chkconfig: 345 20 80
+# chkconfig: 2345 -20 100
 # description: swarm daemon
 # processname: swarm
 

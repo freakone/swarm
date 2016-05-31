@@ -17,8 +17,9 @@ pi = rpi.RPI_HAL()
 
 rd = SwarmReader()
 rd.add_node(0x10, 0, 0)
-rd.add_node(0x11, 500, 0)
-rd.add_node(0x12, 20000, 0)
+rd.add_node(0x11, 5000, 0)
+rd.add_node(0x12, 10000, 0)
+rd.add_node(0x13, 15000, 0)
 rd.log = True
 rd.write_header()
 
@@ -39,24 +40,29 @@ while True:
     ret = t.node_action(rd.NODES)
     if ret:
       returned.append(ret)
-    time.sleep(0.05)
+    time.sleep(0.02)
     measurements = measurements + 1
 
-    if measurements > 40:
+    if measurements > 30:
       print len(returned)
-      if len(returned) > 20:
+      if len(returned) > 15:
         print returned[-1]['dist']
         print returned[-1]['dir']
+        print returned[-1]['pos']
 
-        if returned[-1]['dist'] > 150:
+        if returned[-1]['dist'] > 100:
           if returned[-1]['dir'] == "prawo":
             pi.set_state(rpi.State.turn_right)
+            time.sleep(1)
           else:
             pi.set_state(rpi.State.turn_left)
+            time.sleep(1)
+        else:
+           pi.set_state(rpi.State.error)
+           time.sleep(0.3)
       else:
         pi.set_state(rpi.State.error)
-
-      time.sleep(1.5)
+        time.sleep(1)
 
       pi.set_state(rpi.State.stop)
       t.clear()

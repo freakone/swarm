@@ -10,7 +10,7 @@ import json
 
 class Visualizer:
   def __init__(self):
-    self.TRACKER = ("192.168.1.200", 5005)
+    self.TRACKER = ("192.168.1.1", 5005)
     self.trace_max = 50000
     self.complx = []
     self.comply = []
