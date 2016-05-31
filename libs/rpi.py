@@ -19,7 +19,6 @@ class State(Enum):
 
 class RPI_HAL:
   def __init__(self):
-
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     GPIO.setup(BTN_STOP, GPIO.IN, pull_up_down=GPIO.PUD_UP)

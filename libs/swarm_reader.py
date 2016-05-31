@@ -12,9 +12,7 @@ class SwarmReader:
         self.f_norm = open('normal.txt', 'w')
         self.flag = False
 
-        for c in serial.tools.list_ports.comports():
-            if filter( lambda x: x in c[2], ["FTDI", "0403:6001"]):
-                self.COMPORT = c[0]
+        self.search_com()
 
         if self.COMPORT == "":
             exit("! no device connected")
@@ -23,6 +21,11 @@ class SwarmReader:
             self.com = serial.Serial(self.COMPORT, baudrate=115200, timeout=0.1)
         except Exception as e:
             exit(e)
+
+    def search_com(self):
+      for c in serial.tools.list_ports.comports():
+            if filter( lambda x: x in c[2], ["FTDI", "0403:6001"]):
+                self.COMPORT = c[0]
 
     def add_node(self, id, x, y):
         n = Node(id, x, y)
@@ -56,6 +59,11 @@ class SwarmReader:
                     line = self.com.readline()
             except Exception as e:
                 print(e)
+                try:
+                  self.search_com()
+                  self.com = serial.Serial(self.COMPORT, baudrate=115200, timeout=0.1)
+                except:
+                  print("no device!")
                 print("# com read error")
                 continue
 

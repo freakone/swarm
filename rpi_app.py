@@ -9,9 +9,7 @@ import RPi.GPIO as GPIO
 import libs.rpi as rpi
 from libs.tracker import Tracker
 
-
-measurements = 0
-returned = []
+time.sleep(10)
 
 pi = rpi.RPI_HAL()
 
@@ -34,40 +32,55 @@ th = threading.Thread(target=ping)
 th.setDaemon(True)
 th.start()
 
-while True:
-  if pi.state == rpi.State.running:
+def measure(forced):
+  returned = []
+  for i in range(0, 30):
     rd.update()
     ret = t.node_action(rd.NODES)
     if ret:
       returned.append(ret)
     time.sleep(0.02)
-    measurements = measurements + 1
 
-    if measurements > 30:
-      print len(returned)
-      if len(returned) > 15:
-        print returned[-1]['dist']
-        print returned[-1]['dir']
-        print returned[-1]['pos']
-
-        if returned[-1]['dist'] > 100:
-          if returned[-1]['dir'] == "prawo":
-            pi.set_state(rpi.State.turn_right)
-            time.sleep(1)
-          else:
-            pi.set_state(rpi.State.turn_left)
-            time.sleep(1)
-        else:
-           pi.set_state(rpi.State.error)
-           time.sleep(0.3)
-      else:
-        pi.set_state(rpi.State.error)
-        time.sleep(1)
-
-      pi.set_state(rpi.State.stop)
+    if pi.state == rpi.State.running and not forced:
       t.clear()
       rd.clear()
-      returned = []
-      measurements = 0
+      return False
+
+  print len(returned)
+  if len(returned) > 15:
+    print returned[-1]['dist']
+    print returned[-1]['dir']
+    print returned[-1]['pos']
+
+    if returned[-1]['dist'] > 100:
+      if returned[-1]['dir'] == "prawo":
+        pi.set_state(rpi.State.turn_right)
+        time.sleep(1)
+      else:
+        pi.set_state(rpi.State.turn_left)
+        time.sleep(1)
+    else:
+       pi.set_state(rpi.State.error)
+       time.sleep(0.3)
+  else:
+    pi.set_state(rpi.State.error)
+    time.sleep(1)
+
+  pi.set_state(rpi.State.stop)
+  t.clear()
+  rd.clear()
+  return True
+
+
+while True:
+  if pi.state == rpi.State.stop:
+    if measure(False):
+      for i in range(0,50):
+        time.sleep(0.1)
+        if not pi.state == rpi.State.stop:
+          break
+  elif pi.state == rpi.State.running:
+    print "on demand"
+    measure(True)
   else:
     time.sleep(0.1)
