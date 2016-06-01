@@ -9,8 +9,6 @@ import RPi.GPIO as GPIO
 import libs.rpi as rpi
 from libs.tracker import Tracker
 
-time.sleep(10)
-
 pi = rpi.RPI_HAL()
 
 rd = SwarmReader()
@@ -82,5 +80,6 @@ while True:
   elif pi.state == rpi.State.running:
     print "on demand"
     measure(True)
+    time.sleep(2)
   else:
     time.sleep(0.1)

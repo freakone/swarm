@@ -7,8 +7,8 @@ import RPi.GPIO as GPIO
 
 
 MOTOR = 17
-BTN_START = 22
-BTN_STOP = 27
+BTN_START = 27
+BTN_STOP = 22
 
 class State(Enum):
   periodic = 5
@@ -25,13 +25,13 @@ class RPI_HAL:
     GPIO.setup(BTN_STOP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(BTN_START, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(BTN_START, GPIO.FALLING, callback=self.button_callback)
-    GPIO.add_event_detect(BTN_STOP, GPIO.FALLING, callback=self.button_callback)
+    GPIO.add_event_detect(BTN_STOP, GPIO.BOTH, callback=self.button_callback)
     GPIO.setup(MOTOR, GPIO.OUT)
     GPIO.output(MOTOR, 0)
     self.state = State.stop
     self.periodic_mode = False
     self.btntimes = {BTN_STOP: 1, BTN_START: 1}
-    self.alternate = False
+    self.alternate = GPIO.input(BTN_STOP)
     th_led = threading.Thread(target=self.blinker)
     th_led.setDaemon(True)
     th_led.start()
@@ -46,7 +46,7 @@ class RPI_HAL:
     if channel == BTN_START:
       self.set_state(State.running)
     elif channel == BTN_STOP:
-      self.periodic_mode = not self.periodic_mode
+      self.periodic_mode = GPIO.input(BTN_STOP)
       if self.periodic_mode:
         self.set_state(State.periodic)
       else:
