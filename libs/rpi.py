@@ -46,11 +46,13 @@ class RPI_HAL:
     if channel == BTN_START:
       self.set_state(State.running)
     elif channel == BTN_STOP:
-      self.periodic_mode = GPIO.input(BTN_STOP)
-      if self.periodic_mode:
-        self.set_state(State.periodic)
-      else:
-        self.set_state(State.stop)
+      inp = GPIO.input(BTN_STOP)
+      if not self.periodic_mode == inp:
+        self.periodic_mode = inp
+        if self.periodic_mode:
+          self.set_state(State.periodic)
+        else:
+          self.set_state(State.stop)
 
   def blinker(self):
     while True:
